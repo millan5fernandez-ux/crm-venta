@@ -860,7 +860,7 @@ function catKnown(k){return CATS.some(function(c){return c.k===k})}
 var catColor=function(k){var c=CATS.filter(function(x){return x.k===k})[0];return c?c.c:'var(--s6)'};
 
 var EMPTY=function(){return {v:1,rev:0,example:false,set:{kcal:2400,prot:150,carbs:300,fat:70,water:2500,sets:12,sleep:8},gastos:[],ingresos:[],gym:[],comida:[],cuerpo:[],plans:[],gymdays:[],routines:[],ingr:[],platos:[],profile:{name:'',height:null,goalWeight:null}}};
-var LS='bitacora-v1';
+var LS='bitacora-venta-v1';
 /* nombres de ejercicios y rutinas en español (Hevy los exporta en inglés) */
 var ES_EX={
 'Behind the Back Curl (Cable)':'Curl por detrás de la espalda (polea)','Bicep Curl (Dumbbell)':'Curl con mancuernas','Biceps Curl (Dumbbell)':'Curl con mancuernas','Cable Fly Crossovers':'Cruces en polea','Chest Fly (Machine)':'Pec deck','Hammer Curl (Dumbbell)':'Curl martillo','Incline Bench Press (Dumbbell)':'Press inclinado con mancuernas','Incline Chest Press (Machine)':'Press inclinado en máquina','Iso-Lateral Row (Machine)':'Remo unilateral en máquina','Lat Pulldown (Cable)':'Jalón al pecho','Overhead Triceps Extension (Cable)':'Extensión sobre la cabeza','Preacher Curl (Machine)':'Curl predicador','Press Plano en Máquina':'Press en máquina','Seated Cable Row - Bar Grip':'Remo en polea baja','Seated Row (Machine)':'Remo en máquina','Shoulder Press (Machine Plates)':'Press en máquina de hombro','Single Arm Lateral Raise (Cable)':'Elevaciones laterales en polea','Single Arm Triceps Pushdown (Cable)':'Extensión en polea a una mano','Straight Arm Lat Pulldown (Cable)':'Pullover en polea','Triceps Extension (Cable)':'Extensión en polea','Triceps Pushdown':'Jalón de tríceps en polea',
@@ -880,7 +880,7 @@ try{var raw=localStorage.getItem(LS);if(raw){var o=JSON.parse(raw);if(o&&o.v===1
 var PLATO_SEED=[];
 try{if(PLATO_SEED.length&&!localStorage.getItem(LS+'-seedp')){PLATO_SEED.forEach(function(p){if(!S.platos.some(function(x){return x.id===p.id}))S.platos.push(p)});localStorage.setItem(LS+'-seedp','1')}}catch(e){}
 /* Para activar cuentas y sincronización: pon aquí la URL y la clave pública de tu proyecto Supabase. Vacío = solo datos locales. */
-var SB={url:'',key:'',ls:'bitacora-sb'};
+var SB={url:'',key:'',ls:'bitacora-venta-sb'};
 var sbS=null,sbNote='';
 function jwt(t){try{return JSON.parse(decodeURIComponent(escape(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))))}catch(e){return {}}}
 function sbStore(o){sbS=o;try{if(o)localStorage.setItem(SB.ls,JSON.stringify(o));else localStorage.removeItem(SB.ls)}catch(e){}}
@@ -912,7 +912,7 @@ function flush(){
   saving=true;dirty=false;
   dbDoc.set(JSON.parse(JSON.stringify(S))).then(function(){setSync('Guardado en tu cuenta')},function(){setSync('No se pudo guardar en tu cuenta; los datos siguen en este dispositivo')}).then(function(){saving=false;if(dirty)flush()});
 }
-var SNAPK='bitacora-snaps';
+var SNAPK='bitacora-venta-snaps';
 function cnt(d){return SYNC_LISTS.reduce(function(a,k){return a+((d&&d[k])?d[k].length:0)},0)}
 function snaps(){try{return JSON.parse(localStorage.getItem(SNAPK)||'[]')}catch(e){return[]}}
 function snap(why){
@@ -954,7 +954,7 @@ function sbApply(d){snap('antes de sincronizar');adopt(d);try{localStorage.setIt
 function sbPull(first){
   if(!sbS||saving||dirty)return Promise.resolve();
   return sbReq('/rest/v1/crm_state?select=data,updated_at&user_id=eq.'+sbS.uid).then(function(rows){
-    var d=rows&&rows[0]&&rows[0].data,linked='';try{linked=localStorage.getItem('bitacora-sb-linked')||''}catch(e){}
+    var d=rows&&rows[0]&&rows[0].data,linked='';try{linked=localStorage.getItem('bitacora-venta-sb-linked')||''}catch(e){}
     if(d&&d.v===1){
       if(cnt(S)===0&&cnt(d)>0){sbApply(d);setSync('Sincronizado');sbSay('Datos recuperados de tu cuenta')}
       else if(cnt(d)===0&&cnt(S)>0){S.rev=Date.now();try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}flush();setSync('Sincronizado')}
@@ -963,11 +963,11 @@ function sbPull(first){
       else if((d.rev||0)<(S.rev||0)){flush()}
       else setSync('Sincronizado');
     }else{if(!isEmpty()||S.rev)flush();else setSync('Sincronizado')}
-    try{localStorage.setItem('bitacora-sb-linked',sbS.uid)}catch(e){}
+    try{localStorage.setItem('bitacora-venta-sb-linked',sbS.uid)}catch(e){}
   }).catch(function(e){setSync('Sin conexión con tu cuenta; los datos siguen en este dispositivo');sbSay(e.message||'Sin conexión')});
 }
 function sbStart(){
-  dbDoc={set:function(o){return sbReq('/rest/v1/crm_state?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({user_id:sbS.uid,data:o,updated_at:new Date().toISOString()})}).then(function(){try{localStorage.setItem('bitacora-sb-linked',sbS.uid)}catch(e){}})}};
+  dbDoc={set:function(o){return sbReq('/rest/v1/crm_state?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({user_id:sbS.uid,data:o,updated_at:new Date().toISOString()})}).then(function(){try{localStorage.setItem('bitacora-venta-sb-linked',sbS.uid)}catch(e){}})}};
   setSync('Conectando con tu cuenta…');
   sbPull(true).then(function(){render()});
   if(!sbStart.on){sbStart.on=1;
@@ -1781,8 +1781,8 @@ function render(){
   renderHud();
   document.querySelectorAll('.tab').forEach(function(a){if(a.dataset.tab===ui.tab){a.setAttribute('aria-current','page');try{var nv=a.parentNode;if(nv.scrollWidth>nv.clientWidth)nv.scrollTo({left:a.offsetLeft-nv.clientWidth/2+a.offsetWidth/2,behavior:'auto'})}catch(e){}}else a.removeAttribute('aria-current')});
   $('#hdate').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});var h2=$('#hdate2');if(h2)h2.textContent=$('#hdate').textContent;
-  function setTheme(n,save){document.documentElement.dataset.theme=n;var b=$('#themebtn');if(b){b.setAttribute('aria-checked',n==='dark'?'true':'false');}if(save){try{localStorage.setItem('bitacora-theme',n)}catch(e){}}}
-  var th0='';try{th0=localStorage.getItem('bitacora-theme')||''}catch(e){}
+  function setTheme(n,save){document.documentElement.dataset.theme=n;var b=$('#themebtn');if(b){b.setAttribute('aria-checked',n==='dark'?'true':'false');}if(save){try{localStorage.setItem('bitacora-venta-theme',n)}catch(e){}}}
+  var th0='';try{th0=localStorage.getItem('bitacora-venta-theme')||''}catch(e){}
   if(th0!=='dark'&&th0!=='light'){th0=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'}
   setTheme(th0,false);
   var tb=$('#themebtn');if(tb)tb.onclick=function(){setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark',true)};
@@ -1867,7 +1867,7 @@ document.addEventListener('click',function(e){
   else if(a==='snaprest'){var sn=snaps()[+b.dataset.i];if(sn&&sn.data){snap('antes de restaurar');adopt(sn.data);ui.impmsg='';commit()}}
   else if(a==='sbin'){sbAuth('in')}
   else if(a==='sbup'){sbAuth('up')}
-  else if(a==='sbout'){sbStore(null);dbDoc=null;try{localStorage.removeItem('bitacora-sb-linked')}catch(e){}sbNote='';setSync('Datos guardados solo en este dispositivo');render()}
+  else if(a==='sbout'){sbStore(null);dbDoc=null;try{localStorage.removeItem('bitacora-venta-sb-linked')}catch(e){}sbNote='';setSync('Datos guardados solo en este dispositivo');render()}
   else if(a==='dstep'){dayStep(+b.dataset.i)}
   else if(a==='dstart'){tourStart()}
   else if(a==='tournext'){tourMove(1)}
