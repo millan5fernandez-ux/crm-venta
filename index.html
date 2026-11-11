@@ -1600,7 +1600,7 @@ VIEWS.ajustes=function(){
     fld('perfil','goalWeight','Peso objetivo (kg)','number',pf.goalWeight==null?'':pf.goalWeight,'min="20" max="400" step="any" inputmode="decimal"')+
     fld('perfil','aforoUrl','Aforo de tu gimnasio (enlace https, opcional)','url',pf.aforoUrl||'','maxlength="300" placeholder="https://…"','full')+
     '<div class="f full"><span>Módulos activos</span><div class="mods2">'+MODS.map(function(m){return '<label><input type="checkbox" name="mod_'+m[0]+'"'+(modOn(m[0])?' checked':'')+'> '+m[1]+'</label>'}).join('')+'</div></div>'+
-    '</div><div class="fa"><button class="btn primary" type="submit">Guardar perfil</button></div></form>';
+    '</div><div class="fa"><button class="btn primary" type="submit">Guardar perfil</button><button class="btn" type="button" data-act="introagain">Ver la guía otra vez</button></div></form>';
   var s=S.set;
   var metas='<form class="card" data-form="metas" autocomplete="off"><h3>Mis objetivos</h3><div class="fg">'+
     fld('metas','kcal','Calorías al día','number',s.kcal,'min="0" step="50" required')+
@@ -1733,6 +1733,23 @@ function tourBar(){
     '<div class="tour-dots" aria-hidden="true">'+STEPS.map(function(x,k){return '<b class="'+(k===i?'cur':x.done()?'ok':'')+'"></b>'}).join('')+'</div>'+
     '<div class="fa" style="margin-top:10px"><button type="button" class="btn" data-act="tourprev"'+(i===0?' disabled':'')+'>← Anterior</button><button type="button" class="btn'+(dn?' primary':'')+'" data-act="tournext">'+(last?'Terminar':dn?'Siguiente →':'Saltar →')+'</button></div></div>';
 }
+function introSlides(){
+  var L=[{t:'Tu escritorio',p:'El dashboard resume tu semana de un vistazo. Pulsa una tarjeta, o una zona del escritorio 3D, para abrir ese módulo.'}];
+  if(modOn('gastos')||modOn('comida'))L.push({t:'Apunta en segundos',p:'Usa «Nuevo gasto» arriba o abre Comida para añadir lo que has comido. En «Tu día» tienes los pasos de la mañana, la tarde y la noche.'});
+  if(modOn('gym'))L.push({t:'Importa tus entrenos',p:'En Gym pulsa «Sí, importar mi CSV». Vale el CSV de Hevy, Strong, Fitbod, FitNotes u otra app; si no lo reconozco, eliges tú las columnas.'});
+  if(modOn('gastos'))L.push({t:'Importa tu banco',p:'Al final de Gastos puedes subir el CSV de tu banco. Revisas las columnas, ves una vista previa y los movimientos repetidos se saltan.'});
+  L.push({t:'Ajusta la app a ti',p:'En Ajustes cambias tus objetivos, los módulos que usas y tu perfil. Si tu gimnasio publica el aforo, pega aquí su enlace.'});
+  L.push({t:'Tus datos son tuyos',p:'Todo se guarda en este dispositivo. En Ajustes puedes hacer una copia de seguridad y restaurarla cuando quieras.'});
+  return L;
+}
+function introRender(){
+  var el=document.getElementById('intro');
+  if(!(S.profile&&S.profile.onboarded)||S.profile.introDone){if(el)el.remove();return}
+  var L=introSlides(),i=Math.max(0,Math.min(ui.intro||0,L.length-1)),last=i===L.length-1;
+  if(!el){el=document.createElement('div');el.id='intro';el.className='onb';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','Guía de bienvenida');document.body.appendChild(el)}
+  el.innerHTML='<div class="card"><p class="ts" style="margin:0 0 8px">Paso '+(i+1)+' de '+L.length+'</p><h2>'+esc(L[i].t)+'</h2><p style="margin:0 0 16px;color:var(--ink2);font-size:16px;line-height:1.5">'+esc(L[i].p)+'</p><div class="tour-dots" style="margin:0 0 16px">'+L.map(function(x,j){return '<b class="'+(j<i?'ok':j===i?'cur':'')+'"></b>'}).join('')+'</div><div class="fa">'+(i>0?'<button class="btn" type="button" data-act="intback">Atrás</button>':'')+'<button class="btn primary" type="button" data-act="intnext" autofocus>'+(last?'Empezar':'Siguiente')+'</button>'+(last?'':'<button class="btn" type="button" data-act="intskip">Saltar guía</button>')+'</div></div>';
+  var b=el.querySelector('[data-act="intnext"]');if(b&&b.focus)try{b.focus()}catch(e){}
+}
 function onbRender(){
   var el=document.getElementById('onb');
   if(S.profile&&S.profile.onboarded){if(el)el.remove();return}
@@ -1746,7 +1763,7 @@ function onbRender(){
   document.body.appendChild(el);
 }
 function render(){
-  syncGoals();lines={};applyMods();onbRender();
+  syncGoals();lines={};applyMods();onbRender();introRender();
   var v=VIEWS[ui.tab];
   $('#view').innerHTML=v?tourBar()+banner()+v():'';
   var dt=$('#dtitle');if(dt)dt.textContent=TITLES[ui.tab]||'';
@@ -1852,6 +1869,10 @@ document.addEventListener('click',function(e){
   else if(a==='hvgo'){ui.gymYes=false;hevyGo()}
   else if(a==='hvno'){ui.hv=null;ui.hvmap=null;ui.hvmsg='';render()}
   else if(a==='hvmapgo'){var mp=ui.hvmap;if(mp){if(mp.ix.date<0||mp.ix.ex<0||mp.ix.w<0||mp.ix.r<0){ui.hvmsg='Elige al menos las columnas de fecha, ejercicio, peso y repeticiones.'}else{try{ui.hv=hvParseRows(mp.R,mp.ix,mp.unit,'CSV propio');ui.hvmap=null;ui.hvmsg=''}catch(err){ui.hvmsg='No se pudo leer con esas columnas ('+err.message+').'}}render()}}
+  else if(a==='intnext'){var n0=introSlides().length;if((ui.intro||0)>=n0-1){S.profile=Object.assign({},S.profile,{introDone:true});ui.intro=0;commit()}else{ui.intro=(ui.intro||0)+1;render()}}
+  else if(a==='intback'){ui.intro=Math.max(0,(ui.intro||0)-1);render()}
+  else if(a==='intskip'){S.profile=Object.assign({},S.profile,{introDone:true});ui.intro=0;commit()}
+  else if(a==='introagain'){S.profile=Object.assign({},S.profile,{introDone:false});ui.intro=0;commit()}
   else if(a==='bkno'){ui.bk=null;ui.bkmsg='';render()}
   else if(a==='bkgo'){bankGo()}
   else if(a==='sbsync'){sbSay('Sincronizando…');sbPull().then(function(){flush();sbSay('Sincronizado')})}

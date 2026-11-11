@@ -4,7 +4,7 @@ Panel personal todo en uno: gastos, gym, comida, peso y calendario, con una esce
 
 ## Qué cambia respecto a `crm`
 - **Sin datos personales**: sin avatar, plato de ejemplo, aforo de un gimnasio concreto ni claves de Supabase.
-- **Bienvenida**: al abrir por primera vez pide nombre, módulos a usar y objetivo de calorías.
+- **Bienvenida**: al abrir por primera vez pide nombre, módulos a usar y objetivo de calorías, y después muestra una guía de 4–6 pasos (se puede saltar y repetir desde Ajustes).
 - **Módulos activables**: Gastos, Gym, Comida, Personal y Calendario se pueden quitar desde la bienvenida o en Ajustes (se ocultan del menú y del dashboard; en la escena 3D siguen dibujados).
 - **Aforo opcional**: cada usuario pega el enlace https del aforo de su gimnasio en Ajustes → Mi perfil. Vacío = no aparece.
 - **Importador de entrenamientos universal**: reconoce los CSV de Hevy, Strong, Fitbod y FitNotes por sus cabeceras. Si no los reconoce, deja asignar columnas (fecha, ejercicio, peso, repeticiones) y elegir kg o lb.
