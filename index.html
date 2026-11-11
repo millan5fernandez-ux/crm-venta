@@ -1245,7 +1245,7 @@ VIEWS.gastos=function(){
   var e=curEdit('gastos'),d0=e?e.date:(ui.date.gastos||today());
   var form=formWrap('gastos','Nuevo gasto',
     fld('gastos','date','Fecha','date',d0,'required')+
-    fld('gastos','concept','Concepto','text',e?e.concept:'','required maxlength="60" placeholder="Mercadona, bus…"','wide')+
+    fld('gastos','concept','Concepto','text',e?e.concept:'','required maxlength="60" placeholder="Supermercado, bus…"','wide')+
     sel('gastos','cat','Categoría',CATS.map(function(c){return c.k}),e?e.cat:CATS[0].k)+
     fld('gastos','amount','Importe ('+curSym()+')','number',e?e.amount:'','required min="0" step="any" inputmode="decimal"'));
   return '<div class="bar"><h2>Gastos</h2><div class="nav"><button class="btn" data-act="month" data-d="-1" aria-label="Mes anterior">←</button><strong>'+esc(new Date(Y,M-1,1).toLocaleDateString('es-ES',{month:'long',year:'numeric'}))+'</strong><button class="btn" data-act="month" data-d="1" aria-label="Mes siguiente">→</button></div></div>'+
@@ -1513,7 +1513,7 @@ function myPlatos(){return S.platos.filter(function(p){return p.v===2})}
 function platosCard(){
   var e=curEdit('platos'),L=myPlatos();
   var form=formWrap('platos',e?'Editar plato':'Nuevo plato',
-    fld('platos','name','Nombre','text',e?e.name:'','required maxlength="50" placeholder="Preentreno"','wide')+
+    fld('platos','name','Nombre','text',e?e.name:'','required maxlength="50" placeholder="Desayuno de avena"','wide')+
     sel('platos','meal','Momento',MEALS,e?e.meal:'Comida')+
     fld('platos','kcal','kcal','number',e?e.kcal:'','min="0" step="any" inputmode="numeric" placeholder="auto"')+
     fld('platos','prot','Prot (g)','number',e&&e.prot!=null?e.prot:'','min="0" step="any" inputmode="decimal"')+
@@ -1695,7 +1695,7 @@ var STEPS=[
  {m:0,label:'Peso y sueño',tab:'cuerpo',form:'cuerpo',tip:'Pésate en ayunas y apunta cuántas horas has dormido.',done:function(){var r=dayRec();return r.weight!=null||r.sleep!=null}},
  {m:0,label:'Desayuno',tab:'comida',form:'comida',meal:'Desayuno',tip:'Apunta qué has desayunado y sus calorías.',done:function(){return mealDone('Desayuno')}},
  {m:1,label:'Comida',tab:'comida',form:'comida',meal:'Comida',tip:'Apunta la comida (y la merienda, si la hay).',done:function(){return mealDone('Comida')}},
- {m:1,label:'Gym',tab:'gym',form:'',tip:'Importa el CSV de Hevy de hoy.',done:function(){var t=today();return S.gym.some(function(g){return g.date===t})||S.gymdays.some(function(g){return g.date===t})}},
+ {m:1,label:'Gym',tab:'gym',form:'',tip:'Importa el CSV de tu app de gym de hoy.',done:function(){var t=today();return S.gym.some(function(g){return g.date===t})||S.gymdays.some(function(g){return g.date===t})}},
  {m:1,label:'Gastos',tab:'gastos',form:'gastos',tip:'Apunta lo que has gastado hoy. Si no has gastado nada, pulsa Saltar.',done:function(){var t=today();return S.gastos.some(function(g){return g.date===t})}},
  {m:2,label:'Cena',tab:'comida',form:'comida',meal:'Cena',tip:'Apunta la cena y sus calorías.',done:function(){return mealDone('Cena')}},
  {m:2,label:'Agua, ánimo y nota',tab:'cuerpo',form:'cuerpon',tip:'Cierra el día: agua bebida, cómo te has sentido y una nota.',done:function(){var r=dayRec();return r.mood!=null||r.water!=null}}
@@ -2806,7 +2806,7 @@ function hevyCard(){
     body=(h.src?'<p class="ts" style="margin:10px 0 0">Formato detectado: <b>'+esc(h.src)+'</b></p>':'')+'<p style="margin:10px 0"><b>'+h.days.length+' entrenamientos</b> · '+nm.length+' ejercicios · '+h.sets+' series ('+h.days[0].date+' → '+h.days[h.days.length-1].date+')'+(h.skipped?' · '+h.skipped+' series sin peso ni repeticiones omitidas':'')+'</p>'+
     '<p class="ts" style="margin:0 0 8px">Revisa el músculo de cada ejercicio'+(miss?' (<b>'+miss+' sin asignar</b>: ponlos o se omitirán)':'')+':</p><div id="hvmap" style="max-height:300px;overflow:auto;border:2px solid var(--line);padding:6px">'+
     nm.map(function(n){return '<div style="display:grid;grid-template-columns:1fr 130px;gap:8px;align-items:center;padding:3px 0"><span>'+esc(n)+' <span class="ts">×'+h.names[n]+'</span></span><select class="hvsel" data-n="'+esc(n)+'" aria-label="Músculo de '+esc(n)+'"><option value="">— omitir —</option>'+MUS.map(function(m){return '<option'+(h.map[n]===m?' selected':'')+'>'+m+'</option>'}).join('')+'</select></div>'}).join('')+'</div>'+
-    (exist?'<label style="display:flex;gap:8px;align-items:center;margin:10px 0"><input type="checkbox" id="hvover"'+(h.over?' checked':'')+'> Actualizar los '+exist+' días que ya tienes con lo que dice Hevy (si lo desmarcas, se saltan)</label>':'')+
+    (exist?'<label style="display:flex;gap:8px;align-items:center;margin:10px 0"><input type="checkbox" id="hvover"'+(h.over?' checked':'')+'> Actualizar los '+exist+' días que ya tienes con lo que dice el archivo (si lo desmarcas, se saltan)</label>':'')+
     '<div class="fa"><button class="btn primary" data-act="hvgo">Importar</button><button class="btn" data-act="hvno">Cancelar</button></div>';
   }
   return '<div class="card"><h3>Importar entrenamientos</h3><p style="margin:0 0 10px;color:var(--ink2)">Sube el CSV exportado de Hevy, Strong, Fitbod, FitNotes u otra app de gym. Si no reconozco las columnas, te dejo asignarlas.</p>'+
