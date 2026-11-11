@@ -9,6 +9,7 @@ Panel personal todo en uno: gastos, gym, comida, peso y calendario, con una esce
 - **Aforo opcional**: cada usuario pega el enlace https del aforo de su gimnasio en Ajustes → Mi perfil. Vacío = no aparece.
 - **Importador de entrenamientos universal**: reconoce los CSV de Hevy, Strong, Fitbod y FitNotes por sus cabeceras. Si no los reconoce, deja asignar columnas (fecha, ejercicio, peso, repeticiones) y elegir kg o lb.
 - **Importador de movimientos**: CSV del banco u otra app, con columnas asignables, formato de fecha día/mes o mes/día, signo de los gastos, categorías sugeridas y salto de duplicados.
+- **Todo editable**: objetivos de calorías, macros, agua (en litros) y sueño; moneda (€, $, £, MXN, ARS, COP); categorías de gasto (hasta 8) y perfil, tanto en la bienvenida como en Ajustes.
 - **Solo local por defecto**: sin cuentas hasta que se configure `SB` en `index.html`.
 
 ## Activar cuentas y sincronización

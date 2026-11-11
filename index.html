@@ -839,7 +839,10 @@ var today=function(){return iso(new Date())};
 var weekStart=function(s){return addDays(s,-((parse(s).getDay()+6)%7))};
 var dn=function(s){return Math.round(parse(s).getTime()/864e5)};
 var num=function(n,d){return Number(n).toLocaleString('es-ES',{maximumFractionDigits:d==null?0:d})};
-var eur=function(n){return Number(n).toLocaleString('es-ES',{style:'currency',currency:'EUR',minimumFractionDigits:Number.isInteger(n)?0:2,maximumFractionDigits:2})};
+var CURS=[['EUR','Euro (€)'],['USD','Dólar ($)'],['GBP','Libra (£)'],['MXN','Peso mexicano (MXN)'],['ARS','Peso argentino (ARS)'],['COP','Peso colombiano (COP)']];
+var curCode=function(){var c=S&&S.set&&S.set.cur;return CURS.some(function(x){return x[0]===c})?c:'EUR'};
+var curSym=function(){try{return (0).toLocaleString('es-ES',{style:'currency',currency:curCode(),currencyDisplay:'narrowSymbol',maximumFractionDigits:0}).replace(/[\d\s\u00a0.,]/g,'')}catch(e){return '€'}};
+var eur=function(n){return Number(n).toLocaleString('es-ES',{style:'currency',currency:curCode(),currencyDisplay:'narrowSymbol',minimumFractionDigits:Number.isInteger(n)?0:2,maximumFractionDigits:2})};
 var fdate=function(s){return parse(s).toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'})};
 var fshort=function(s){return parse(s).toLocaleDateString('es-ES',{day:'numeric',month:'short'})};
 var DOW=function(s){return ['D','L','M','X','J','V','S'][parse(s).getDay()]};
@@ -851,6 +854,9 @@ var CATS=[{k:'Comida',c:'var(--s1)'},{k:'Transporte',c:'var(--s2)'},{k:'Ocio',c:
 var MUSCLES=['Pecho','Espalda','Hombro','Bíceps','Tríceps','Cuádriceps','Isquios','Glúteo','Gemelo','Core'];
 var MEALS=['Desayuno','Comida','Merienda','Cena','Snack'];
 var MACRO=[{k:'prot',n:'Proteína',c:'var(--s1)',m:4},{k:'carbs',n:'Hidratos',c:'var(--s2)',m:4},{k:'fat',n:'Grasas',c:'var(--s3)',m:9}];
+var CATS_DEF=['Comida','Transporte','Ocio','Gym y salud','Compras','Otros'];
+function buildCats(){var n=(S.set&&S.set.cats&&S.set.cats.length)?S.set.cats:CATS_DEF;CATS=n.map(function(k,i){return {k:k,c:'var(--s'+((i%6)+1)+')'}})}
+function catKnown(k){return CATS.some(function(c){return c.k===k})}
 var catColor=function(k){var c=CATS.filter(function(x){return x.k===k})[0];return c?c.c:'var(--s6)'};
 
 var EMPTY=function(){return {v:1,rev:0,example:false,set:{kcal:2400,prot:150,carbs:300,fat:70,water:2500,sets:12,sleep:8},gastos:[],ingresos:[],gym:[],comida:[],cuerpo:[],plans:[],gymdays:[],routines:[],ingr:[],platos:[],profile:{name:'',height:null,goalWeight:null}}};
@@ -1225,7 +1231,7 @@ VIEWS.gastos=function(){
   var byDay=[];for(var i=0;i<dim;i++)byDay.push(0);
   items.forEach(function(g){byDay[+g.date.slice(8)-1]+=g.amount});
   var dayCols=cols(byDay.map(function(v,i){var d=i+1;return {label:(d===1||d%5===0)?String(d):'',v:v,tip:d+' '+parse(month+'-01').toLocaleDateString('es-ES',{month:'short'})+': '+eur(v)}}),{aria:'Gasto por día del mes'});
-  var cat=CATS.map(function(c){return {c:c,v:sum(items.filter(function(g){return g.cat===c.k}),function(g){return g.amount})}}).filter(function(x){return x.v>0}).sort(function(a,b){return b.v-a.v});
+  var cat=CATS.map(function(c){return {c:c,v:sum(items.filter(function(g){return g.cat===c.k||(c.k===CATS[CATS.length-1].k&&!catKnown(g.cat))}),function(g){return g.amount})}}).filter(function(x){return x.v>0}).sort(function(a,b){return b.v-a.v});
   var cmax=cat.length?cat[0].v:1;
   var catRows=cat.length?hbars(cat.map(function(x){return {label:x.c.k,dot:x.c.c,color:x.c.c,v:x.v,right:eur(x.v),tip:x.c.k+': '+eur(x.v)+' ('+Math.round(x.v/total*100)+'%)'}}),cmax):'<p class="empty">Sin gastos este mes.</p>';
   var iday=[];for(var q2=0;q2<dim;q2++)iday.push(0);
@@ -1235,13 +1241,13 @@ VIEWS.gastos=function(){
   var iform=formWrap('ingresos','Nuevo ingreso',
     fld('ingresos','date','Fecha','date',ie?ie.date:(ui.date.ingresos||today()),'required')+
     fld('ingresos','concept','Concepto','text',ie?ie.concept:'','required maxlength="60" placeholder="Paga, trabajo, venta…"','wide')+
-    fld('ingresos','amount','Importe (€)','number',ie?ie.amount:'','required min="0" step="any" inputmode="decimal"'));
+    fld('ingresos','amount','Importe ('+curSym()+')','number',ie?ie.amount:'','required min="0" step="any" inputmode="decimal"'));
   var e=curEdit('gastos'),d0=e?e.date:(ui.date.gastos||today());
   var form=formWrap('gastos','Nuevo gasto',
     fld('gastos','date','Fecha','date',d0,'required')+
     fld('gastos','concept','Concepto','text',e?e.concept:'','required maxlength="60" placeholder="Mercadona, bus…"','wide')+
-    sel('gastos','cat','Categoría',CATS.map(function(c){return c.k}),e?e.cat:'Comida')+
-    fld('gastos','amount','Importe (€)','number',e?e.amount:'','required min="0" step="any" inputmode="decimal"'));
+    sel('gastos','cat','Categoría',CATS.map(function(c){return c.k}),e?e.cat:CATS[0].k)+
+    fld('gastos','amount','Importe ('+curSym()+')','number',e?e.amount:'','required min="0" step="any" inputmode="decimal"'));
   return '<div class="bar"><h2>Gastos</h2><div class="nav"><button class="btn" data-act="month" data-d="-1" aria-label="Mes anterior">←</button><strong>'+esc(new Date(Y,M-1,1).toLocaleDateString('es-ES',{month:'long',year:'numeric'}))+'</strong><button class="btn" data-act="month" data-d="1" aria-label="Mes siguiente">→</button></div></div>'+
   dsBox('gastos')+
   '<div class="grid">'+form+iform+'</div>'+
@@ -1607,9 +1613,11 @@ VIEWS.ajustes=function(){
     fld('metas','prot','Proteína (g)','number',s.prot,'min="0" step="5" required')+
     fld('metas','carbs','Hidratos (g)','number',s.carbs,'min="0" step="5" required')+
     fld('metas','fat','Grasas (g)','number',s.fat,'min="0" step="5" required')+
-    fld('metas','water','Meta de agua al día (ml)','number',s.water,'min="0" step="100" required')+
+    fld('metas','water','Meta de agua al día (litros)','number',Math.round(s.water/100)/10,'min="0.5" max="8" step="0.1" inputmode="decimal" required')+
     fld('metas','sleep','Sueño (h)','number',s.sleep,'min="1" max="14" step="0.5" required')+
-    '</div><div class="fa"><button class="btn primary" type="submit">Guardar objetivos</button></div></form>';
+    '<label class="f" for="f-metas-cur"><span>Moneda</span><select id="f-metas-cur" name="cur">'+CURS.map(function(c){return '<option value="'+c[0]+'"'+(c[0]===curCode()?' selected':'')+'>'+esc(c[1])+'</option>'}).join('')+'</select></label>'+
+    fld('metas','cats','Categorías de gasto (separadas por comas, máx. 8)','text',CATS.map(function(c){return c.k}).join(', '),'maxlength="160"','full')+
+    '</div><p class="ts" style="margin:8px 0 0">Si quitas una categoría, sus gastos pasan a contarse en la última de la lista.</p><div class="fa"><button class="btn primary" type="submit">Guardar objetivos</button></div></form>';
   var gl='<form class="card" data-form="goals" autocomplete="off"><h3>Series semanales por músculo</h3><p class="ts" style="margin:0 0 10px">Rango objetivo de series por semana (sin contar el calentamiento). Si quieres una cifra fija, pon el mismo número en las dos casillas.</p><div class="fg">'+
     MAIN.map(function(m){return '<div class="f"><span>'+esc(m)+'</span><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><input type="number" name="lo_'+esc(m)+'" aria-label="'+esc(m)+' mínimo" min="0" max="60" step="1" inputmode="numeric" value="'+GOALS[m][0]+'" required><input type="number" name="hi_'+esc(m)+'" aria-label="'+esc(m)+' máximo" min="0" max="60" step="1" inputmode="numeric" value="'+GOALS[m][1]+'" required></div></div>'}).join('')+
     '</div><p class="ts">Izquierda: mínimo · derecha: máximo.</p><div class="fa"><button class="btn primary" type="submit">Guardar series</button><button class="btn" type="button" data-act="goalsreset">Restablecer</button></div></form>';
@@ -1738,7 +1746,7 @@ function introSlides(){
   if(modOn('gastos')||modOn('comida'))L.push({t:'Apunta en segundos',p:'Usa «Nuevo gasto» arriba o abre Comida para añadir lo que has comido. En «Tu día» tienes los pasos de la mañana, la tarde y la noche.'});
   if(modOn('gym'))L.push({t:'Importa tus entrenos',p:'En Gym pulsa «Sí, importar mi CSV». Vale el CSV de Hevy, Strong, Fitbod, FitNotes u otra app; si no lo reconozco, eliges tú las columnas.'});
   if(modOn('gastos'))L.push({t:'Importa tu banco',p:'Al final de Gastos puedes subir el CSV de tu banco. Revisas las columnas, ves una vista previa y los movimientos repetidos se saltan.'});
-  L.push({t:'Ajusta la app a ti',p:'En Ajustes cambias tus objetivos, los módulos que usas y tu perfil. Si tu gimnasio publica el aforo, pega aquí su enlace.'});
+  L.push({t:'Ajusta la app a ti',p:'En Ajustes cambias tus objetivos (calorías, agua, sueño), la moneda, las categorías de gasto, los módulos que usas y tu perfil. Si tu gimnasio publica el aforo, pega aquí su enlace.'});
   L.push({t:'Tus datos son tuyos',p:'Todo se guarda en este dispositivo. En Ajustes puedes hacer una copia de seguridad y restaurarla cuando quieras.'});
   return L;
 }
@@ -1759,11 +1767,14 @@ function onbRender(){
     fld('onb','name','¿Cómo te llamas?','text','','maxlength="30" autocomplete="given-name"','full')+
     '<div class="f full"><span>¿Qué quieres controlar?</span><div class="mods">'+MODS.map(function(m){return '<label><input type="checkbox" name="mod_'+m[0]+'" checked> '+m[1]+'</label>'}).join('')+'</div></div>'+
     fld('onb','kcal','Calorías al día (objetivo)','number',S.set.kcal,'min="800" step="50" inputmode="numeric"')+
+    fld('onb','water','Agua al día (litros)','number',Math.round(S.set.water/100)/10,'min="0.5" max="8" step="0.1" inputmode="decimal"')+
+    fld('onb','sleep','Horas de sueño','number',S.set.sleep,'min="4" max="12" step="0.5" inputmode="decimal"')+
+    '<label class="f" for="f-onb-cur"><span>Moneda</span><select id="f-onb-cur" name="cur">'+CURS.map(function(c){return '<option value="'+c[0]+'"'+(c[0]===curCode()?' selected':'')+'>'+esc(c[1])+'</option>'}).join('')+'</select></label>'+
     '</div><div class="fa"><button class="btn primary" type="submit">Empezar</button></div></form>';
   document.body.appendChild(el);
 }
 function render(){
-  syncGoals();lines={};applyMods();onbRender();introRender();
+  buildCats();syncGoals();lines={};applyMods();onbRender();introRender();
   var v=VIEWS[ui.tab];
   $('#view').innerHTML=v?tourBar()+banner()+v():'';
   var dt=$('#dtitle');if(dt)dt.textContent=TITLES[ui.tab]||'';
@@ -1973,9 +1984,13 @@ var HANDLERS={
     save('plans',{date:f.date,time:f.time||'',title:f.title.trim().slice(0,80),kind:f.kind});
   },
   perfil:function(f){var mods={};MODS.forEach(function(m){mods[m[0]]=f['mod_'+m[0]]?1:0});var au=(f.aforoUrl||'').trim().slice(0,300);if(au&&!/^https:\/\//i.test(au))au='';S.profile=Object.assign({},S.profile,{name:(f.name||'').trim().slice(0,30),height:fnum(f.height),goalWeight:fnum(f.goalWeight),aforoUrl:au,mods:mods});commit()},
-  onb:function(f){var mods={};MODS.forEach(function(m){mods[m[0]]=f['mod_'+m[0]]?1:0});var k=fnum(f.kcal);if(k&&k>0)S.set.kcal=k;S.profile=Object.assign({},S.profile,{name:(f.name||'').trim().slice(0,30),mods:mods,onboarded:true});go('escritorio')},
+  onb:function(f){var mods={};MODS.forEach(function(m){mods[m[0]]=f['mod_'+m[0]]?1:0});var k=fnum(f.kcal);if(k&&k>0)S.set.kcal=k;var wl=fnum(f.water);if(wl&&wl>=.5&&wl<=8)S.set.water=Math.round(wl*1000);var sl=fnum(f.sleep);if(sl&&sl>=4&&sl<=12)S.set.sleep=sl;if(f.cur&&CURS.some(function(c){return c[0]===f.cur}))S.set.cur=f.cur;S.profile=Object.assign({},S.profile,{name:(f.name||'').trim().slice(0,30),mods:mods,onboarded:true});go('escritorio')},
   goals:function(f){var g={};MAIN.forEach(function(m){var lo=fnum(f['lo_'+m]),hi=fnum(f['hi_'+m]);if(lo==null||lo<0)lo=GDEF[m][0];if(hi==null||hi<lo)hi=lo;g[m]=[Math.round(lo),Math.round(hi)]});S.set.goals=g;commit()},
-  metas:function(f){['kcal','prot','carbs','fat','water','sets','sleep'].forEach(function(k){var n=fnum(f[k]);if(n!=null&&n>0)S.set[k]=n});commit()}
+  metas:function(f){['kcal','prot','carbs','fat','sets','sleep'].forEach(function(k){var n=fnum(f[k]);if(n!=null&&n>0)S.set[k]=n});
+    var wl=fnum(f.water);if(wl!=null&&wl>=.5&&wl<=8)S.set.water=Math.round(wl*1000);
+    if(f.cur&&CURS.some(function(c){return c[0]===f.cur}))S.set.cur=f.cur;
+    if(f.cats!=null){var cs=[];String(f.cats).split(',').forEach(function(x){x=x.trim().slice(0,20);if(x&&cs.indexOf(x)<0&&cs.length<8)cs.push(x)});if(cs.length)S.set.cats=cs}
+    commit()}
 };
 document.addEventListener('submit',function(e){
   var form=e.target.closest('form[data-form]');if(!form)return;
@@ -2681,7 +2696,7 @@ function hvDate(v){
   return '';
 }
 function esEx(n){return ES_EX[n]||n}
-var CSV_ALIAS={date:['start_time','date','workout date','workout_date','datetime','fecha','day'],ex:['exercise_title','exercise name','exercise_name','exercise','ejercicio'],w:['weight_kg','weight (kg)','weight(kg)','weight','weight (lbs)','weight (lb)','weight_lbs','peso'],r:['reps','repetitions','repeticiones','rep'],ti:['title','workout name','workout_name','routine','rutina'],ty:['set_type','set order','set_order','iswarmup','is warmup','is_warmup']};
+var CSV_ALIAS={date:['start_time','date','workout date','workout_date','datetime','fecha','day'],ex:['exercise_title','exercise name','exercise_name','exercise','ejercicio'],w:['weight_kg','weight (kg)','weight(kg)','weight','weight (lbs)','weight (lb)','weight_lbs','weight kg','weight lb','weight lbs','peso','peso (kg)','peso (lb)','peso (lbs)','peso kg','peso lb','peso lbs','carga','carga (kg)','kg','lbs','lb'],r:['reps','repetitions','repeticiones','rep'],ti:['title','workout name','workout_name','routine','rutina','entrenamiento','nombre del entrenamiento'],ty:['set_type','set order','set_order','iswarmup','is warmup','is_warmup']};
 function csvFindCols(H){var ix={};Object.keys(CSV_ALIAS).forEach(function(k){ix[k]=-1;for(var j=0;j<CSV_ALIAS[k].length&&ix[k]<0;j++)ix[k]=H.indexOf(CSV_ALIAS[k][j])});return ix}
 function csvSrc(H){var h=function(n){return H.indexOf(n)>-1};return h('set_type')&&h('start_time')?'Hevy':(h('set order')||h('workout name'))?'Strong':h('iswarmup')?'Fitbod':(h('category')&&h('distance unit'))?'FitNotes':'CSV'}
 function hvParse(txt){
@@ -2743,7 +2758,7 @@ function bankDate(v,f){
   return hvDate(v);
 }
 var BK_CAT=[['Comida',/mercadona|carrefour|lidl|aldi|dia\b|supermerc|restaur|bar |cafe|café|glovo|just ?eat|burger|pizza/i],['Transporte',/gasolin|repsol|cepsa|renfe|metro|uber|cabify|bus|taxi|parking|peaje|alsa/i],['Ocio',/netflix|spotify|hbo|disney|cine|steam|playstation|xbox|concierto|ticket/i],['Gym y salud',/gym|gimnas|farmacia|decathlon|clinica|clínica|dentista|fisio/i],['Compras',/amazon|zara|pull|ikea|aliexpress|el corte|mediamarkt|pccomponentes/i]];
-function bankCat(t){for(var i=0;i<BK_CAT.length;i++)if(BK_CAT[i][1].test(t))return BK_CAT[i][0];return 'Otros'}
+function bankCat(t){var last=CATS[CATS.length-1].k;for(var i=0;i<BK_CAT.length;i++)if(BK_CAT[i][1].test(t)&&catKnown(BK_CAT[i][0]))return BK_CAT[i][0];return last}
 function bankRows(b){
   var out=[],x=b.ix;if(x.date<0||x.con<0||x.amt<0)return out;
   b.R.slice(1).forEach(function(r){
