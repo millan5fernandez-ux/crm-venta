@@ -1,0 +1,335 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Bitácora</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Bitácora reúne gastos, gym, comida y cuerpo en un solo panel. Tus datos se quedan en tu dispositivo. 1,99 € de pago único.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Concepto: hero a pantalla completa con el panel real de la app recortado por abajo; debajo, secciones de venta sobrias. Marca: rojo Bitácora sobre blanco roto, serif para titulares, mono para etiquetas. */
+:root{
+  --bg:#f8f7f4; --card:#ffffff; --soft:#efeee9; --ink:#17171a; --ink2:#6b6b72; --line:#e2e0d9;
+  --accent:#ff3b3b; --accent-ink:#ffffff; --good:#14884a; --warn:#b26a00; --glass:rgba(255,255,255,.55); --glass-line:rgba(255,255,255,.7);
+  --shadow:0 25px 80px -12px rgba(0,0,0,.12),0 0 0 1px rgba(0,0,0,.06);
+  --blob1:rgba(255,59,59,.20); --blob2:rgba(255,170,120,.28); --blob3:rgba(120,150,255,.16);
+  --serif:'Instrument Serif',Georgia,serif; --sans:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111113; --card:#1a1a1d; --soft:#222226; --ink:#f3f2ee; --ink2:#a2a2a9; --line:#2d2d32;
+  --accent:#ff5656; --accent-ink:#17171a; --good:#4cc98a; --warn:#e0a040; --glass:rgba(30,30,34,.55); --glass-line:rgba(255,255,255,.1);
+  --shadow:0 25px 80px -12px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.08);
+  --blob1:rgba(255,59,59,.22); --blob2:rgba(255,140,90,.16); --blob3:rgba(100,130,255,.16);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111113; --card:#1a1a1d; --soft:#222226; --ink:#f3f2ee; --ink2:#a2a2a9; --line:#2d2d32;
+  --accent:#ff5656; --accent-ink:#17171a; --good:#4cc98a; --warn:#e0a040; --glass:rgba(30,30,34,.55); --glass-line:rgba(255,255,255,.1);
+  --shadow:0 25px 80px -12px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.08);
+  --blob1:rgba(255,59,59,.22); --blob2:rgba(255,140,90,.16); --blob3:rgba(100,130,255,.16);color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--sans);-webkit-font-smoothing:antialiased;padding-left:max(0px,env(safe-area-inset-left,0px));padding-right:max(0px,env(safe-area-inset-right,0px))}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+.wrap{width:100%;max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* nav */
+.nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:20px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:20px;letter-spacing:-.02em;text-decoration:none}
+.logo i{display:grid;place-items:center;width:28px;height:28px;background:var(--accent);color:var(--accent-ink);font:700 15px var(--mono);font-style:normal;border-radius:6px}
+.nav nav{display:flex;align-items:center;gap:28px}
+.nav nav a.l{font-size:14px;color:var(--ink2);text-decoration:none}
+.nav nav a.l:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:12px 22px;font:500 14px var(--sans);text-decoration:none;border:0;cursor:pointer;background:var(--ink);color:var(--bg);transition:transform .15s,opacity .15s}
+.btn:hover{opacity:.88}.btn:active{transform:scale(.98)}
+.btn.red{background:var(--accent);color:var(--accent-ink)}
+.btn.sm{padding:9px 18px}
+.btn[aria-disabled=true]{opacity:.5;pointer-events:none}
+.play{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--card);box-shadow:0 2px 12px rgba(0,0,0,.1);text-decoration:none;color:var(--ink)}
+.play svg{width:14px;height:14px;fill:currentColor}
+@media (max-width:760px){.nav nav a.l{display:none}}
+
+/* hero */
+.hero{position:relative;overflow:hidden;min-height:100svh;display:flex;flex-direction:column}
+.bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg::before{content:"";position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:44px 44px;opacity:.55;-webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 35%,#000 20%,transparent 75%);mask-image:radial-gradient(ellipse 70% 60% at 50% 35%,#000 20%,transparent 75%)}
+.blob{position:absolute;border-radius:50%;filter:blur(70px)}
+.b1{width:520px;height:520px;left:-120px;top:-60px;background:var(--blob1);animation:d1 18s ease-in-out infinite alternate}
+.b2{width:460px;height:460px;right:-100px;top:80px;background:var(--blob2);animation:d2 22s ease-in-out infinite alternate}
+.b3{width:420px;height:420px;left:38%;top:42%;background:var(--blob3);animation:d3 26s ease-in-out infinite alternate}
+@keyframes d1{to{transform:translate(120px,90px)}}@keyframes d2{to{transform:translate(-110px,60px)}}@keyframes d3{to{transform:translate(-90px,-70px)}}
+.hero .in{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;flex:1;text-align:center}
+.badge{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 16px;font-size:13px;color:var(--ink2);margin-top:clamp(8px,3vh,36px)}
+.badge b{font:700 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font:400 clamp(44px,8.2vw,84px)/.95 var(--serif);letter-spacing:-.025em;margin:24px 0 0;max-width:15ch;text-wrap:balance}
+h1 em{font-style:italic}
+.sub{margin:18px 0 0;max-width:620px;color:var(--ink2);font-size:clamp(16px,2vw,18px);text-wrap:pretty}
+.cta{margin-top:22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center}
+.price-note{margin-top:12px;font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+.up{animation:up .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.d1{animation-delay:.08s}.d2{animation-delay:.16s}.d3{animation-delay:.24s}.d4{animation-delay:.32s}.d5{animation-delay:.45s;animation-duration:.9s}
+@media (prefers-reduced-motion:reduce){.up,.blob{animation:none!important}}
+
+/* panel de la app (maqueta) */
+.shot{margin-top:34px;width:100%;max-width:980px;border-radius:18px;padding:12px;background:var(--glass);border:1px solid var(--glass-line);box-shadow:var(--shadow);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);text-align:left;flex:1 0 auto}
+.app{display:grid;grid-template-columns:150px 1fr;border-radius:10px;overflow:hidden;background:var(--card);font-size:11px;user-select:none;pointer-events:none;min-height:420px}
+.side{border-right:1px solid var(--line);padding:12px 10px;display:flex;flex-direction:column;gap:2px}
+.side .brand{display:flex;align-items:center;gap:7px;font-weight:600;font-size:12px;margin-bottom:10px}
+.side .brand i{display:grid;place-items:center;width:20px;height:20px;background:var(--accent);color:var(--accent-ink);border-radius:5px;font:700 10px var(--mono);font-style:normal}
+.side span{padding:6px 8px;border-radius:6px;color:var(--ink2)}
+.side span.on{background:var(--soft);color:var(--ink);font-weight:500}
+.side h6{margin:12px 8px 4px;font:700 9px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+.main{padding:14px 16px;background:var(--bg);display:flex;flex-direction:column;gap:12px;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:center}
+.top strong{font-size:14px;font-weight:600}
+.top small{font:500 9px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.t{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 10px}
+.t small{display:block;font:700 8px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink2)}
+.t b{display:block;font:400 22px var(--serif);margin-top:2px}
+.t em{font-style:normal;color:var(--ink2);font-size:10px}
+.t.hot{background:var(--ink);color:var(--bg)}.t.hot small{color:inherit;opacity:.7}
+.row2{display:grid;grid-template-columns:1.3fr 1fr;gap:8px}
+.card2{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0}
+.card2 h5{margin:0 0 6px;font:700 8px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink2)}
+.chart{width:100%;height:78px;display:block}
+.steps{display:flex;flex-direction:column;gap:4px}
+.steps div{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:6px;background:var(--soft)}
+.steps i{display:grid;place-items:center;width:13px;height:13px;border-radius:50%;border:1.5px solid var(--line);font-style:normal;font-size:8px;color:transparent}
+.steps div.ok i{background:var(--good);border-color:var(--good);color:#fff}
+.steps div.now{outline:1.5px solid var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:10px}
+th{text-align:left;font:700 8px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink2);padding:0 0 4px}
+td{padding:5px 0;border-top:1px solid var(--line)}
+td.n{font-variant-numeric:tabular-nums}
+.ok2{color:var(--good)}.pend{color:var(--warn)}
+@media (max-width:760px){.app{grid-template-columns:1fr}.side{display:none}.tiles{grid-template-columns:repeat(2,1fr)}.row2{grid-template-columns:1fr}.shot{padding:8px}}
+
+/* secciones */
+section{padding-block:clamp(56px,9vw,104px)}
+.eyebrow{font:700 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:0 0 12px}
+h2{font:400 clamp(34px,5vw,54px)/1 var(--serif);letter-spacing:-.02em;margin:0;max-width:18ch;text-wrap:balance}
+h2 em{font-style:italic}
+.lead{max-width:56ch;color:var(--ink2);margin:16px 0 0;font-size:17px;text-wrap:pretty}
+.mods{margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:0 36px}
+.mod{padding:22px 0;border-top:1px solid var(--line);min-width:0}
+.mod h3{margin:0 0 6px;font:600 17px var(--sans);letter-spacing:-.01em}
+.mod p{margin:0;color:var(--ink2);font-size:15px}
+@media (max-width:860px){.mods{grid-template-columns:1fr 1fr}}@media (max-width:560px){.mods{grid-template-columns:1fr}}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,6vw,72px);align-items:center}
+@media (max-width:860px){.split{grid-template-columns:1fr}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;font-size:14px}
+.csv{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;font:12px/1.7 var(--mono);color:var(--ink2);overflow-x:auto;white-space:pre}
+.csv b{color:var(--ink);font-weight:500}
+.csv .arrow{display:block;margin:8px 0;color:var(--accent);font-weight:700}
+.band{background:var(--soft)}
+.facts{margin:28px 0 0;padding:0;list-style:none;display:grid;gap:14px}
+.facts li{display:flex;gap:12px;align-items:flex-start}
+.facts svg{flex:none;width:20px;height:20px;margin-top:2px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* precio */
+.pricebox{margin-top:36px;max-width:520px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:clamp(22px,4vw,34px);box-shadow:var(--shadow)}
+.pricebox .tag{font:700 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.amount{display:flex;align-items:baseline;gap:10px;margin:8px 0 2px}
+.amount b{font:400 72px/1 var(--serif);letter-spacing:-.03em}
+.amount span{color:var(--ink2)}
+.pricebox ul{list-style:none;margin:18px 0 22px;padding:0;display:grid;gap:9px}
+.pricebox li{display:flex;gap:10px;font-size:15px}
+.pricebox li::before{content:"✓";color:var(--good);font-weight:700}
+.pricebox .small{margin:12px 0 0;font-size:13px;color:var(--ink2)}
+.msg{margin-top:12px;font-size:14px;color:var(--ink2)}
+.msg[hidden]{display:none}
+
+/* faq */
+.faq{margin-top:32px;max-width:760px}
+details{border-top:1px solid var(--line);padding:18px 0}
+details:last-child{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;font:600 17px var(--sans);list-style:none;display:flex;justify-content:space-between;gap:16px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font:400 22px/1 var(--sans);color:var(--ink2)}
+details[open] summary::after{content:"–"}
+details p{margin:10px 0 0;color:var(--ink2);max-width:62ch}
+
+footer{border-top:1px solid var(--line);padding-block:32px 48px;color:var(--ink2);font-size:14px}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px 32px}
+footer nav{display:flex;flex-wrap:wrap;gap:8px 22px}
+footer a{text-decoration:none}footer a:hover{color:var(--ink)}
+</style></head><body>
+
+<header class="hero" id="top">
+  <div class="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+  <div class="wrap in">
+    <div class="nav" style="width:100%">
+      <a class="logo" href="#top"><i>B</i>Bitácora</a>
+      <nav aria-label="Principal">
+        <a class="l" href="#que-hace">Qué hace</a>
+        <a class="l" href="#importa">Importar</a>
+        <a class="l" href="#precio">Precio</a>
+        <a class="l" href="#faq">Preguntas</a>
+        <a class="btn sm" href="#precio">Conseguirla</a>
+      </nav>
+    </div>
+
+    <span class="badge up"><b>Nuevo</b> Importa tu CSV de Hevy, Strong y de tu banco</span>
+    <h1 class="up d1">Gastos, gym y comida, <em>por fin</em> en un solo sitio</h1>
+    <p class="sub up d2">Un panel para apuntar lo que gastas, entrenas, comes y pesas. Sin cuenta, sin anuncios y con tus datos guardados en tu propio dispositivo.</p>
+    <div class="cta up d3">
+      <a class="btn red" href="#precio" style="padding:15px 26px">Empezar por 1,99 €</a>
+      <a class="play" href="https://millan5fernandez-ux.github.io/crm/demo/" target="_blank" rel="noopener" aria-label="Ver la demo"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5v13l11-6.5z"/></svg></a>
+    </div>
+    <div class="price-note up d3">Pago único · sin suscripción</div>
+
+    <div class="shot up d5" aria-hidden="true">
+      <div class="app">
+        <aside class="side">
+          <div class="brand"><i>B</i>Bitácora</div>
+          <span class="on">Escritorio</span><span>Resumen</span><span>Gastos</span><span>Gym</span><span>Comida</span><span>Personal</span><span>Calendario</span>
+          <h6>Atajos</h6><span>Nuevo gasto</span><span>Añadir comida</span><span>Importar CSV</span><span>Ajustes</span>
+        </aside>
+        <div class="main">
+          <div class="top"><strong>Hola, Ana</strong><small>Jueves · ejemplo</small></div>
+          <div class="tiles">
+            <div class="t hot"><small>Gasto del mes</small><b>412 €</b><em>ingresos 1.650 €</em></div>
+            <div class="t"><small>Calorías hoy</small><b>1.840</b><em>/ 2.200</em></div>
+            <div class="t"><small>Series semana</small><b>46</b><em>4 sesiones</em></div>
+            <div class="t"><small>Peso · media mes</small><b>71,8</b><em>kg</em></div>
+          </div>
+          <div class="row2">
+            <div class="card2">
+              <h5>Peso · 90 días</h5>
+              <svg class="chart" viewBox="0 0 400 80" preserveAspectRatio="none" role="presentation">
+                <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".22"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
+                <path d="M0 20 C40 18 60 26 100 30 S160 40 200 38 S270 52 310 56 S370 62 400 64 L400 80 L0 80Z" fill="url(#g1)"/>
+                <path d="M0 20 C40 18 60 26 100 30 S160 40 200 38 S270 52 310 56 S370 62 400 64" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
+                <circle cx="400" cy="64" r="3.2" fill="var(--accent)"/>
+              </svg>
+            </div>
+            <div class="card2">
+              <h5>Tu día</h5>
+              <div class="steps">
+                <div class="ok"><i>✓</i>Peso y sueño</div>
+                <div class="ok"><i>✓</i>Desayuno</div>
+                <div class="now"><i>✓</i>Comida</div>
+                <div><i>✓</i>Gym</div>
+              </div>
+            </div>
+          </div>
+          <div class="card2">
+            <h5>Últimas comidas</h5>
+            <table><thead><tr><th>Momento</th><th>Alimento</th><th>kcal</th><th>Prot.</th></tr></thead><tbody>
+              <tr><td>Desayuno</td><td>Copos de avena · leche · plátano</td><td class="n">420</td><td class="n">16 g</td></tr>
+              <tr><td>Comida</td><td>Pollo ahumado · arroz · verduras</td><td class="n">690</td><td class="n">42 g</td></tr>
+              <tr><td>Snack</td><td>Tortitas de trigo · pavo</td><td class="n">210</td><td class="n">14 g</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="que-hace">
+  <div class="wrap">
+    <p class="eyebrow">Qué hace</p>
+    <h2>Lo que apuntas cada día, <em>junto</em></h2>
+    <p class="lead">Cada módulo se puede activar o dejar fuera al empezar. Usa solo lo que te sirve.</p>
+    <div class="mods">
+      <div class="mod"><h3>Gastos</h3><p>Apunta gastos e ingresos, mira a dónde se va el dinero por categorías y cambia la moneda.</p></div>
+      <div class="mod"><h3>Gym</h3><p>Series por músculo cada semana con tu rango objetivo, y rutinas importadas desde tu app.</p></div>
+      <div class="mod"><h3>Comida</h3><p>Calorías y macros. Guarda tus alimentos por 100 g y apúntalos con los gramos o las raciones.</p></div>
+      <div class="mod"><h3>Personal</h3><p>Peso con media mensual, sueño, agua y ánimo, para ver la tendencia y no solo el último dato.</p></div>
+      <div class="mod"><h3>Calendario</h3><p>Planes y constancia del mes en una vista. Marca lo hecho y mira tu racha.</p></div>
+      <div class="mod"><h3>Tu día</h3><p>Un recorrido por los pasos del día, de la mañana a la noche. Si no lo quieres, se apaga en Ajustes.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="importa" class="band">
+  <div class="wrap split">
+    <div>
+      <p class="eyebrow">Importar</p>
+      <h2>Trae lo que <em>ya tienes</em></h2>
+      <p class="lead">Arrastra el CSV de tu app de gym o de tu banco. Bitácora detecta las columnas y te enseña cómo las ha leído antes de guardar nada.</p>
+      <div class="chips"><span class="chip">Hevy</span><span class="chip">Strong</span><span class="chip">CSV de gym genérico</span><span class="chip">CSV de banco</span></div>
+    </div>
+    <div class="csv" aria-label="Ejemplo de importación"><b>fecha,ejercicio,peso,reps</b>
+2026-11-10,Press banca,60,8
+2026-11-10,Remo con barra,55,10
+<span class="arrow">↓ Formato detectado</span><b>Press banca</b>  Pecho    60 kg × 8
+<b>Remo con barra</b>  Espalda  55 kg × 10</div>
+  </div>
+</section>
+
+<section id="datos">
+  <div class="wrap split">
+    <div>
+      <p class="eyebrow">Tus datos</p>
+      <h2>Se quedan <em>contigo</em></h2>
+      <p class="lead">Bitácora no te pide cuenta. Lo que apuntas se guarda en el navegador de tu dispositivo.</p>
+    </div>
+    <ul class="facts">
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><strong>Sin cuenta ni anuncios.</strong> Abres la página y empiezas.</span></li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><strong>Copia de seguridad cuando quieras.</strong> Copias un texto y lo pegas en otro dispositivo.</span></li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><strong>Borrado total en un toque</strong> desde Ajustes, sin esperar a nadie.</span></li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span><strong>Todo editable desde el primer día:</strong> objetivos, macros, moneda, categorías y módulos.</span></li>
+    </ul>
+  </div>
+</section>
+
+<section id="precio" class="band">
+  <div class="wrap">
+    <p class="eyebrow">Precio</p>
+    <h2>Un precio, <em>sin sorpresas</em></h2>
+    <div class="pricebox">
+      <span class="tag">Precio de lanzamiento</span>
+      <div class="amount"><b>1,99 €</b><span>pago único</span></div>
+      <ul>
+        <li>Todos los módulos: gastos, gym, comida, personal y calendario</li>
+        <li>Importadores de CSV de gym y de banco</li>
+        <li>Guía de bienvenida y objetivos editables</li>
+        <li>Sin suscripción ni cuenta</li>
+      </ul>
+      <a class="btn red" id="buy" href="#precio" style="width:100%;padding:15px 22px">Conseguir Bitácora</a>
+      <p class="msg" id="buymsg" hidden>La compra aún no está abierta. Vuelve pronto o prueba antes la demo.</p>
+      <p class="small">Es un producto digital de acceso inmediato. Consulta los <a href="https://millan5fernandez-ux.github.io/crm-venta/legal/terminos.html">términos</a> para el derecho de desistimiento.</p>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <p class="eyebrow">Preguntas</p>
+    <h2>Lo que suelen <em>preguntar</em></h2>
+    <div class="faq">
+      <details><summary>¿Necesito crear una cuenta?</summary><p>No. Bitácora guarda tus datos en el navegador de tu dispositivo. Si cambias de dispositivo, usas la copia de seguridad.</p></details>
+      <details><summary>¿Qué pasa si borro los datos del navegador?</summary><p>Se pierden los datos que no hayas copiado. Por eso Ajustes tiene un botón para copiar una copia de seguridad cuando quieras.</p></details>
+      <details><summary>¿Funciona en el móvil?</summary><p>Sí, la página se adapta al móvil y se puede añadir a la pantalla de inicio.</p></details>
+      <details><summary>¿Con qué apps puedo importar?</summary><p>Con los CSV de Hevy y Strong, con CSV de gym genéricos con fecha, ejercicio, peso y repeticiones, y con el CSV de tu banco para los gastos.</p></details>
+      <details><summary>¿Es de pago único o de suscripción?</summary><p>Pago único de 1,99 € durante el lanzamiento. No hay cuotas mensuales.</p></details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Bitácora</span>
+    <nav aria-label="Legal">
+      <a href="https://millan5fernandez-ux.github.io/crm-venta/legal/aviso-legal.html">Aviso legal</a>
+      <a href="https://millan5fernandez-ux.github.io/crm-venta/legal/privacidad.html">Privacidad</a>
+      <a href="https://millan5fernandez-ux.github.io/crm-venta/legal/terminos.html">Términos</a>
+      <a href="https://millan5fernandez-ux.github.io/crm-venta/legal/almacenamiento.html">Almacenamiento</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+/* Configuración de venta: pega aquí el enlace de pago (Lemon Squeezy, Paddle…) y, opcional, el de lista de espera. */
+var CHECKOUT_URL='';
+var WAITLIST_URL='';
+(function(){
+  var b=document.getElementById('buy'),m=document.getElementById('buymsg');
+  if(CHECKOUT_URL){b.href=CHECKOUT_URL;b.target='_blank';b.rel='noopener';return}
+  if(WAITLIST_URL){b.textContent='Avísame cuando abra';b.href=WAITLIST_URL;b.target='_blank';b.rel='noopener';return}
+  b.addEventListener('click',function(e){e.preventDefault();m.hidden=false});
+})();
+</script>
+</body></html>
