@@ -824,6 +824,9 @@ body.drawer-open #dayflow{display:none}
 .onb h2{margin:0 0 6px;font-size:28px;letter-spacing:-.02em}
 .onb .mods{display:flex;flex-wrap:wrap;gap:12px 20px}.onb .mods label,.mods2 label{display:flex;gap:8px;align-items:center;cursor:pointer}
 .mods2{display:flex;flex-wrap:wrap;gap:12px 20px}
+.mods label,.mods2 label{font:14px var(--font-body);letter-spacing:0;text-transform:none;color:var(--ink);line-height:1.35;align-items:flex-start!important}
+.mods input[type=checkbox],.mods2 input[type=checkbox]{width:20px!important;height:20px;min-height:0!important;flex:none;margin:1px 0 0;padding:0;accent-color:var(--accent)}
+.mods label span,.mods2 label span{flex:1}
 </style>
 <div id="app">
   <header id="top">
@@ -1660,7 +1663,7 @@ VIEWS.ajustes=function(){
     fld('perfil','goalWeight','Peso objetivo (kg)','number',pf.goalWeight==null?'':pf.goalWeight,'min="20" max="400" step="any" inputmode="decimal"')+
     fld('perfil','aforoUrl','Aforo de tu gimnasio (enlace https, opcional)','url',pf.aforoUrl||'','maxlength="300" placeholder="https://…"','full')+
     '<div class="f full"><span>Módulos activos</span><div class="mods2">'+MODS.map(function(m){return '<label><input type="checkbox" name="mod_'+m[0]+'"'+(modOn(m[0])?' checked':'')+'> '+m[1]+'</label>'}).join('')+'</div></div>'+
-    '<div class="f full"><span>Escritorio</span><div class="mods2"><label><input type="checkbox" name="dayflow"'+(dayOn()?' checked':'')+'> Mostrar «Tu día» (pasos del día y recorrido guiado)</label></div></div>'+
+    '<div class="f full"><span>Escritorio</span><div class="mods2"><label><input type="checkbox" name="dayflow"'+(dayOn()?' checked':'')+'> <span>Mostrar «Tu día» (pasos del día y recorrido guiado)</span></label></div></div>'+
     '</div><div class="fa"><button class="btn primary" type="submit">Guardar perfil</button><button class="btn" type="button" data-act="introagain">Ver la guía otra vez</button></div></form>';
   var s=S.set;
   var metas='<form class="card" data-form="metas" autocomplete="off"><h3>Mis objetivos</h3><div class="fg">'+
@@ -1849,14 +1852,22 @@ function onbRender(){
   el.innerHTML='<form class="card" data-form="onb" autocomplete="off"><h2>Bienvenido a Bitácora</h2><p style="margin:0 0 14px;color:var(--ink2)">Tus datos se guardan en este dispositivo. Elige qué quieres usar; podrás cambiarlo cuando quieras en Ajustes.</p><div class="fg">'+
     fld('onb','name','¿Cómo te llamas?','text','','maxlength="30" autocomplete="given-name"','full')+
     '<div class="f full"><span>¿Qué quieres controlar?</span><div class="mods">'+MODS.map(function(m){return '<label><input type="checkbox" name="mod_'+m[0]+'" checked> '+m[1]+'</label>'}).join('')+'</div></div>'+
-    '<div class="f full"><span>Escritorio</span><div class="mods"><label><input type="checkbox" name="dayflow" checked> Mostrar «Tu día»: pasos del día y recorrido guiado</label></div></div>'+
+    '<div class="f full"><span>Escritorio</span><div class="mods"><label><input type="checkbox" name="dayflow" checked> <span>Mostrar «Tu día»: pasos del día y recorrido guiado</span></label></div></div>'+
+    fld('onb','height','Altura (cm)','number','','min="100" max="250" step="any" inputmode="decimal" placeholder="opcional"')+
+    fld('onb','goalWeight','Peso objetivo (kg)','number','','min="20" max="400" step="any" inputmode="decimal" placeholder="opcional"')+
     fld('onb','kcal','Calorías al día (objetivo)','number',S.set.kcal,'min="800" step="50" inputmode="numeric"')+
+    fld('onb','prot','Proteína (g)','number',S.set.prot,'min="0" step="5" inputmode="numeric"')+
+    fld('onb','carbs','Hidratos (g)','number',S.set.carbs,'min="0" step="5" inputmode="numeric"')+
+    fld('onb','fat','Grasas (g)','number',S.set.fat,'min="0" step="5" inputmode="numeric"')+
     fld('onb','water','Agua al día (litros)','number',Math.round(S.set.water/100)/10,'min="0.5" max="8" step="0.1" inputmode="decimal"')+
     fld('onb','sleep','Horas de sueño','number',S.set.sleep,'min="4" max="12" step="0.5" inputmode="decimal"')+
     '<label class="f" for="f-onb-cur"><span>Moneda</span><select id="f-onb-cur" name="cur">'+CURS.map(function(c){return '<option value="'+c[0]+'"'+(c[0]===curCode()?' selected':'')+'>'+esc(c[1])+'</option>'}).join('')+'</select></label>'+
     '</div><p class="ts" style="margin:12px 0 0">Al empezar aceptas los <a href="legal/terminos.html" target="_blank" rel="noopener">términos</a> y la <a href="legal/privacidad.html" target="_blank" rel="noopener">política de privacidad</a>.</p><div class="fa"><button class="btn primary" type="submit">Empezar</button></div></form>';
   document.body.appendChild(el);
 }
+document.addEventListener('input',function(e){var t=e.target;if(!t||!t.name)return;var fm=t.closest&&t.closest('form[data-form="onb"]');if(!fm)return;
+  if(t.name==='kcal'){var k=parseFloat(String(t.value).replace(',','.'));if(k>0){var m={prot:Math.round(k*.3/4/5)*5,carbs:Math.round(k*.45/4/5)*5,fat:Math.round(k*.25/9/5)*5};['prot','carbs','fat'].forEach(function(q){var i=fm.querySelector('[name="'+q+'"]');if(i&&!i.dataset.touched)i.value=m[q]})}}
+  else if(t.name==='prot'||t.name==='carbs'||t.name==='fat')t.dataset.touched='1'});
 function render(){
   buildCats();syncGoals();lines={};applyMods();onbRender();introRender();
   var v=VIEWS[ui.tab];
@@ -2068,7 +2079,7 @@ var HANDLERS={
     save('plans',{date:f.date,time:f.time||'',title:f.title.trim().slice(0,80),kind:f.kind});
   },
   perfil:function(f){var mods={};MODS.forEach(function(m){mods[m[0]]=f['mod_'+m[0]]?1:0});var au=(f.aforoUrl||'').trim().slice(0,300);if(au&&!/^https:\/\//i.test(au))au='';S.profile=Object.assign({},S.profile,{name:(f.name||'').trim().slice(0,30),height:fnum(f.height),goalWeight:fnum(f.goalWeight),aforoUrl:au,mods:mods,dayflow:f.dayflow?1:0});if(!f.dayflow)ui.tour=null;commit()},
-  onb:function(f){var mods={};MODS.forEach(function(m){mods[m[0]]=f['mod_'+m[0]]?1:0});var k=fnum(f.kcal);if(k&&k>0)S.set.kcal=k;var wl=fnum(f.water);if(wl&&wl>=.5&&wl<=8)S.set.water=Math.round(wl*1000);var sl=fnum(f.sleep);if(sl&&sl>=4&&sl<=12)S.set.sleep=sl;if(f.cur&&CURS.some(function(c){return c[0]===f.cur}))S.set.cur=f.cur;S.profile=Object.assign({},S.profile,{name:(f.name||'').trim().slice(0,30),mods:mods,dayflow:f.dayflow?1:0,onboarded:true});go('escritorio')},
+  onb:function(f){var mods={};MODS.forEach(function(m){mods[m[0]]=f['mod_'+m[0]]?1:0});var k=fnum(f.kcal);if(k&&k>0)S.set.kcal=k;['prot','carbs','fat'].forEach(function(q){var v=fnum(f[q]);if(v!=null&&v>=0)S.set[q]=v});var wl=fnum(f.water);if(wl&&wl>=.5&&wl<=8)S.set.water=Math.round(wl*1000);var sl=fnum(f.sleep);if(sl&&sl>=4&&sl<=12)S.set.sleep=sl;if(f.cur&&CURS.some(function(c){return c[0]===f.cur}))S.set.cur=f.cur;S.profile=Object.assign({},S.profile,{name:(f.name||'').trim().slice(0,30),height:fnum(f.height),goalWeight:fnum(f.goalWeight),mods:mods,dayflow:f.dayflow?1:0,onboarded:true});go('escritorio')},
   goals:function(f){var g={};MAIN.forEach(function(m){var lo=fnum(f['lo_'+m]),hi=fnum(f['hi_'+m]);if(lo==null||lo<0)lo=GDEF[m][0];if(hi==null||hi<lo)hi=lo;g[m]=[Math.round(lo),Math.round(hi)]});S.set.goals=g;commit()},
   metas:function(f){['kcal','prot','carbs','fat','sets','sleep'].forEach(function(k){var n=fnum(f[k]);if(n!=null&&n>0)S.set[k]=n});
     var wl=fnum(f.water);if(wl!=null&&wl>=.5&&wl<=8)S.set.water=Math.round(wl*1000);
