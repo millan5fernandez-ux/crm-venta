@@ -730,6 +730,7 @@ body.intro .bw .bq{transform-origin:bottom;animation:grow 1.19s 1.53s cubic-bezi
 .hb .tr u{top:-5px;bottom:-5px;width:2px;background:var(--ink);opacity:.55}
 /* Tu día */
 #dayflow{margin:0 0 14px;padding:14px}
+#dayflow[hidden]{display:none!important}
 #dayflow .dh{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
 #dayflow .dfc{font:700 12px var(--font-mono);letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
 .dfg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
@@ -945,6 +946,7 @@ try{var _r=localStorage.getItem(SB.ls);if(_r)sbS=JSON.parse(_r)}catch(e){}
   try{history.replaceState(null,'',location.pathname+location.search+'#escritorio')}catch(e){}
 })();
 var MODS=[['gastos','Gastos'],['gym','Gym'],['comida','Comida'],['cuerpo','Personal'],['metas','Calendario']];
+function dayOn(){return !(S.profile&&S.profile.dayflow===0)}
 function modOn(k){var m=S.profile&&S.profile.mods;return !m||m[k]!==0}
 function applyMods(){document.body.dataset.off=MODS.filter(function(m){return !modOn(m[0])}).map(function(m){return m[0]}).join(' ')}
 var TABS=['escritorio','resumen','gastos','gym','comida','cuerpo','metas','ajustes'];
@@ -1658,6 +1660,7 @@ VIEWS.ajustes=function(){
     fld('perfil','goalWeight','Peso objetivo (kg)','number',pf.goalWeight==null?'':pf.goalWeight,'min="20" max="400" step="any" inputmode="decimal"')+
     fld('perfil','aforoUrl','Aforo de tu gimnasio (enlace https, opcional)','url',pf.aforoUrl||'','maxlength="300" placeholder="https://…"','full')+
     '<div class="f full"><span>Módulos activos</span><div class="mods2">'+MODS.map(function(m){return '<label><input type="checkbox" name="mod_'+m[0]+'"'+(modOn(m[0])?' checked':'')+'> '+m[1]+'</label>'}).join('')+'</div></div>'+
+    '<div class="f full"><span>Escritorio</span><div class="mods2"><label><input type="checkbox" name="dayflow"'+(dayOn()?' checked':'')+'> Mostrar «Tu día» (pasos del día y recorrido guiado)</label></div></div>'+
     '</div><div class="fa"><button class="btn primary" type="submit">Guardar perfil</button><button class="btn" type="button" data-act="introagain">Ver la guía otra vez</button></div></form>';
   var s=S.set;
   var metas='<form class="card" data-form="metas" autocomplete="off"><h3>Mis objetivos</h3><div class="fg">'+
@@ -1755,6 +1758,8 @@ var STEPS=[
 function nowMom(){var h=new Date().getHours();return h<12?0:h<20?1:2}
 function dayFlow(){
   var el=$('#dayflow');if(!el)return;
+  if(!dayOn()){el.hidden=true;el.innerHTML='';if(ui.tour)ui.tour=null;return}
+  el.hidden=false;
   var nd=STEPS.filter(function(s){return s.done()}).length,cm=nowMom(),all=nd===STEPS.length;
   var cols=MOM.map(function(n,mi){
     var btns=STEPS.map(function(s,i){return s.m===mi?'<button type="button" class="dfs'+(s.done()?' ok':'')+'" data-act="dstep" data-i="'+i+'"><i aria-hidden="true">'+(s.done()?'✓':'')+'</i><span>'+esc(s.label)+'</span><small class="sr">'+(s.done()?' hecho':' pendiente')+'</small></button>':''}).join('');
@@ -1844,6 +1849,7 @@ function onbRender(){
   el.innerHTML='<form class="card" data-form="onb" autocomplete="off"><h2>Bienvenido a Bitácora</h2><p style="margin:0 0 14px;color:var(--ink2)">Tus datos se guardan en este dispositivo. Elige qué quieres usar; podrás cambiarlo cuando quieras en Ajustes.</p><div class="fg">'+
     fld('onb','name','¿Cómo te llamas?','text','','maxlength="30" autocomplete="given-name"','full')+
     '<div class="f full"><span>¿Qué quieres controlar?</span><div class="mods">'+MODS.map(function(m){return '<label><input type="checkbox" name="mod_'+m[0]+'" checked> '+m[1]+'</label>'}).join('')+'</div></div>'+
+    '<div class="f full"><span>Escritorio</span><div class="mods"><label><input type="checkbox" name="dayflow" checked> Mostrar «Tu día»: pasos del día y recorrido guiado</label></div></div>'+
     fld('onb','kcal','Calorías al día (objetivo)','number',S.set.kcal,'min="800" step="50" inputmode="numeric"')+
     fld('onb','water','Agua al día (litros)','number',Math.round(S.set.water/100)/10,'min="0.5" max="8" step="0.1" inputmode="decimal"')+
     fld('onb','sleep','Horas de sueño','number',S.set.sleep,'min="4" max="12" step="0.5" inputmode="decimal"')+
@@ -2061,8 +2067,8 @@ var HANDLERS={
     ui.sel=f.date;ui.cal=f.date.slice(0,7);
     save('plans',{date:f.date,time:f.time||'',title:f.title.trim().slice(0,80),kind:f.kind});
   },
-  perfil:function(f){var mods={};MODS.forEach(function(m){mods[m[0]]=f['mod_'+m[0]]?1:0});var au=(f.aforoUrl||'').trim().slice(0,300);if(au&&!/^https:\/\//i.test(au))au='';S.profile=Object.assign({},S.profile,{name:(f.name||'').trim().slice(0,30),height:fnum(f.height),goalWeight:fnum(f.goalWeight),aforoUrl:au,mods:mods});commit()},
-  onb:function(f){var mods={};MODS.forEach(function(m){mods[m[0]]=f['mod_'+m[0]]?1:0});var k=fnum(f.kcal);if(k&&k>0)S.set.kcal=k;var wl=fnum(f.water);if(wl&&wl>=.5&&wl<=8)S.set.water=Math.round(wl*1000);var sl=fnum(f.sleep);if(sl&&sl>=4&&sl<=12)S.set.sleep=sl;if(f.cur&&CURS.some(function(c){return c[0]===f.cur}))S.set.cur=f.cur;S.profile=Object.assign({},S.profile,{name:(f.name||'').trim().slice(0,30),mods:mods,onboarded:true});go('escritorio')},
+  perfil:function(f){var mods={};MODS.forEach(function(m){mods[m[0]]=f['mod_'+m[0]]?1:0});var au=(f.aforoUrl||'').trim().slice(0,300);if(au&&!/^https:\/\//i.test(au))au='';S.profile=Object.assign({},S.profile,{name:(f.name||'').trim().slice(0,30),height:fnum(f.height),goalWeight:fnum(f.goalWeight),aforoUrl:au,mods:mods,dayflow:f.dayflow?1:0});if(!f.dayflow)ui.tour=null;commit()},
+  onb:function(f){var mods={};MODS.forEach(function(m){mods[m[0]]=f['mod_'+m[0]]?1:0});var k=fnum(f.kcal);if(k&&k>0)S.set.kcal=k;var wl=fnum(f.water);if(wl&&wl>=.5&&wl<=8)S.set.water=Math.round(wl*1000);var sl=fnum(f.sleep);if(sl&&sl>=4&&sl<=12)S.set.sleep=sl;if(f.cur&&CURS.some(function(c){return c[0]===f.cur}))S.set.cur=f.cur;S.profile=Object.assign({},S.profile,{name:(f.name||'').trim().slice(0,30),mods:mods,dayflow:f.dayflow?1:0,onboarded:true});go('escritorio')},
   goals:function(f){var g={};MAIN.forEach(function(m){var lo=fnum(f['lo_'+m]),hi=fnum(f['hi_'+m]);if(lo==null||lo<0)lo=GDEF[m][0];if(hi==null||hi<lo)hi=lo;g[m]=[Math.round(lo),Math.round(hi)]});S.set.goals=g;commit()},
   metas:function(f){['kcal','prot','carbs','fat','sets','sleep'].forEach(function(k){var n=fnum(f[k]);if(n!=null&&n>0)S.set[k]=n});
     var wl=fnum(f.water);if(wl!=null&&wl>=.5&&wl<=8)S.set.water=Math.round(wl*1000);
