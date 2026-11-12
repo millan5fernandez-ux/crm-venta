@@ -766,6 +766,58 @@ body.drawer-open #dayflow{display:none}
 [data-off~="cuerpo"] [data-go="cuerpo"],[data-off~="cuerpo"] .tab[data-tab="cuerpo"]{display:none!important}
 [data-off~="metas"] [data-go="metas"],[data-off~="metas"] .tab[data-tab="metas"]{display:none!important}
 /* bienvenida */
+#intro{position:fixed;inset:0;z-index:100;pointer-events:none}
+#intro .isp{position:fixed;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,.66);opacity:0;transition:left .5s cubic-bezier(.2,.8,.2,1),top .5s cubic-bezier(.2,.8,.2,1),width .5s cubic-bezier(.2,.8,.2,1),height .5s cubic-bezier(.2,.8,.2,1)}
+#intro .isp::after{content:"";position:absolute;inset:-2px;border-radius:16px;border:2px solid var(--accent)}
+#intro .gc{pointer-events:auto;position:fixed;left:calc(var(--navw,72px) + 28px);bottom:24px;width:min(380px,calc(100vw - 32px));background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px 18px;box-shadow:0 18px 50px rgba(0,0,0,.5)}
+#intro .gc h2{margin:0 0 6px;font-size:22px;letter-spacing:-.02em}
+#intro .ip{margin:0 0 14px;color:var(--ink2);font-size:15px;line-height:1.5}
+#intro .iill{height:76px;margin:0 0 10px;border-radius:12px;background:var(--soft);display:flex;align-items:center;justify-content:center;overflow:hidden}
+#intro .iill svg{height:70px;width:auto;fill:var(--accent);stroke:none}
+#intro .iill .i-trk{fill:none;stroke:var(--line);stroke-width:6}
+#intro .iill rect.i-trk{fill:var(--card);stroke:var(--line);stroke-width:2}
+#intro .iill g.i-trk rect{fill:var(--line)}
+#intro .iill .i-ring{fill:none;stroke:var(--accent);stroke-width:6;stroke-linecap:round;stroke-dasharray:163;stroke-dashoffset:163}
+#intro .iill .i-plate{fill:var(--accent)}
+#intro .iill .i-line{fill:none;stroke:var(--accent);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:140;stroke-dashoffset:140}
+#intro .iill .i-chk path,#intro .iill .i-tick{fill:none;stroke:var(--accent);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+#intro .iill .i-shield{fill:none;stroke:var(--accent);stroke-width:4;stroke-linejoin:round}
+#intro .iill .i-coin{fill:var(--accent)}
+@media (max-width:860px){#intro .gc{left:16px;right:16px;bottom:auto;top:max(12px,env(safe-area-inset-top,0px));width:auto}#intro .iill{display:none}#intro .ip{font-size:14px;margin-bottom:10px}}
+@media (prefers-reduced-motion:no-preference){
+#intro .isp::after{animation:ipulse 1.6s ease-out infinite}
+@keyframes ipulse{0%{box-shadow:0 0 0 0 rgba(30,215,96,.55)}100%{box-shadow:0 0 0 16px rgba(30,215,96,0)}}
+#intro .gc.in{animation:iin .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes iin{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+#intro .i-pop rect{transform-box:fill-box;transform-origin:center;animation:ipop 2.4s ease-in-out infinite}
+#intro .i-pop rect:nth-child(2){animation-delay:.15s}#intro .i-pop rect:nth-child(3){animation-delay:.3s}#intro .i-pop rect:nth-child(4){animation-delay:.45s}#intro .i-pop rect:nth-child(5){animation-delay:.6s}
+@keyframes ipop{0%,10%{transform:scale(0);opacity:0}30%,80%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}}
+#intro .i-bars rect{transform-box:fill-box;transform-origin:bottom;animation:ibar 2.2s ease-in-out infinite}
+#intro .i-bars rect:nth-child(2){animation-delay:.15s}#intro .i-bars rect:nth-child(3){animation-delay:.3s}#intro .i-bars rect:nth-child(4){animation-delay:.45s}
+@keyframes ibar{0%{transform:scaleY(0)}35%,85%{transform:scaleY(1)}100%{transform:scaleY(0)}}
+#intro .i-coin{animation:icoin 2.2s ease-in-out infinite}
+@keyframes icoin{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+#intro .i-bell{transform-box:fill-box;transform-origin:center;animation:ibell 1.6s ease-in-out infinite}
+@keyframes ibell{0%,100%{transform:translateY(8px) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
+#intro .i-ring{animation:iring 2.6s ease-in-out infinite}
+@keyframes iring{0%{stroke-dashoffset:163}60%,90%{stroke-dashoffset:45}100%{stroke-dashoffset:163}}
+#intro .i-line{animation:iline 2.6s ease-in-out infinite}
+@keyframes iline{0%{stroke-dashoffset:140}60%,90%{stroke-dashoffset:0}100%{stroke-dashoffset:140}}
+#intro .i-dot{animation:idot 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes idot{0%,55%{transform:scale(0)}70%{transform:scale(1.4)}85%,100%{transform:scale(1)}}
+#intro .i-chk path{stroke-dasharray:24;stroke-dashoffset:24;animation:ichk 2.8s ease-in-out infinite}
+#intro .i-chk path:nth-child(2){animation-delay:.3s}#intro .i-chk path:nth-child(3){animation-delay:.6s}#intro .i-chk path:nth-child(4){animation-delay:.9s}
+@keyframes ichk{0%{stroke-dashoffset:24}25%,85%{stroke-dashoffset:0}100%{stroke-dashoffset:24}}
+#intro .i-k1{animation:ik1 2.6s ease-in-out infinite}#intro .i-k2{animation:ik2 2.6s ease-in-out infinite}#intro .i-k3{animation:ik3 2.6s ease-in-out infinite}
+@keyframes ik1{0%,100%{transform:translateX(0)}50%{transform:translateX(50px)}}
+@keyframes ik2{0%,100%{transform:translateX(0)}50%{transform:translateX(-40px)}}
+@keyframes ik3{0%,100%{transform:translateX(0)}50%{transform:translateX(34px)}}
+#intro .i-shield{stroke-dasharray:200;stroke-dashoffset:200;animation:ishield 2.6s ease-in-out infinite}
+@keyframes ishield{0%{stroke-dashoffset:200}45%,90%{stroke-dashoffset:0}100%{stroke-dashoffset:200}}
+#intro .i-tick{stroke-dasharray:50;stroke-dashoffset:50;animation:itick 2.6s ease-in-out infinite}
+@keyframes itick{0%,40%{stroke-dashoffset:50}65%,90%{stroke-dashoffset:0}100%{stroke-dashoffset:50}}
+}
+@media (prefers-reduced-motion:reduce){#intro .iill .i-ring{stroke-dashoffset:45}#intro .iill .i-line,#intro .iill .i-shield,#intro .iill .i-tick{stroke-dashoffset:0}#intro .iill .i-chk path{stroke-dashoffset:0}}
 .onb{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.72);display:flex;align-items:flex-start;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) 16px 16px;overflow:auto}
 .onb .card{max-width:540px;width:100%;margin:auto 0}
 .onb h2{margin:0 0 6px;font-size:28px;letter-spacing:-.02em}
@@ -1741,23 +1793,48 @@ function tourBar(){
     '<div class="tour-dots" aria-hidden="true">'+STEPS.map(function(x,k){return '<b class="'+(k===i?'cur':x.done()?'ok':'')+'"></b>'}).join('')+'</div>'+
     '<div class="fa" style="margin-top:10px"><button type="button" class="btn" data-act="tourprev"'+(i===0?' disabled':'')+'>← Anterior</button><button type="button" class="btn'+(dn?' primary':'')+'" data-act="tournext">'+(last?'Terminar':dn?'Siguiente →':'Saltar →')+'</button></div></div>';
 }
+var ILL={
+esc:'<svg viewBox="0 0 120 70" aria-hidden="true"><g class="i-pop"><rect x="6" y="8" width="32" height="24" rx="4"/><rect x="44" y="8" width="32" height="24" rx="4"/><rect x="82" y="8" width="32" height="24" rx="4"/><rect x="6" y="38" width="68" height="24" rx="4"/><rect x="82" y="38" width="32" height="24" rx="4"/></g></svg>',
+gastos:'<svg viewBox="0 0 120 70" aria-hidden="true"><g class="i-bars"><rect x="10" y="20" width="16" height="44" rx="3"/><rect x="34" y="36" width="16" height="28" rx="3"/><rect x="58" y="10" width="16" height="54" rx="3"/><rect x="82" y="28" width="16" height="36" rx="3"/></g><circle class="i-coin" cx="106" cy="14" r="8"/></svg>',
+gym:'<svg viewBox="0 0 120 70" aria-hidden="true"><g class="i-bell"><rect x="20" y="29" width="80" height="6" rx="3"/><rect x="10" y="16" width="12" height="32" rx="3"/><rect x="2" y="22" width="9" height="20" rx="3"/><rect x="98" y="16" width="12" height="32" rx="3"/><rect x="109" y="22" width="9" height="20" rx="3"/></g></svg>',
+comida:'<svg viewBox="0 0 120 70" aria-hidden="true"><circle cx="60" cy="35" r="26" class="i-trk"/><circle cx="60" cy="35" r="26" class="i-ring" transform="rotate(-90 60 35)"/><circle cx="60" cy="35" r="12" class="i-plate"/></svg>',
+cuerpo:'<svg viewBox="0 0 120 70" aria-hidden="true"><polyline class="i-line" points="6,56 28,44 50,50 72,28 94,34 114,12"/><circle class="i-dot" cx="114" cy="12" r="5"/></svg>',
+metas:'<svg viewBox="0 0 120 70" aria-hidden="true"><rect x="8" y="8" width="104" height="54" rx="6" class="i-trk"/><g class="i-chk"><path d="M20 30l6 6 10-12"/><path d="M52 30l6 6 10-12"/><path d="M84 30l6 6 10-12"/><path d="M36 48l6 6 10-12"/></g></svg>',
+ajustes:'<svg viewBox="0 0 120 70" aria-hidden="true"><g class="i-trk"><rect x="12" y="14" width="96" height="6" rx="3"/><rect x="12" y="34" width="96" height="6" rx="3"/><rect x="12" y="54" width="96" height="6" rx="3"/></g><circle class="i-k1" cx="30" cy="17" r="7"/><circle class="i-k2" cx="80" cy="37" r="7"/><circle class="i-k3" cx="50" cy="57" r="7"/></svg>',
+datos:'<svg viewBox="0 0 120 70" aria-hidden="true"><path class="i-shield" d="M60 6l26 9v18c0 16-11 26-26 31C45 59 34 49 34 33V15z"/><path class="i-tick" d="M48 34l9 9 16-18"/></svg>'};
 function introSlides(){
-  var L=[{t:'Tu escritorio',p:'El dashboard resume tu semana de un vistazo. Pulsa una tarjeta, o una zona del escritorio 3D, para abrir ese módulo.'}];
-  if(modOn('gastos')||modOn('comida'))L.push({t:'Apunta en segundos',p:'Usa «Nuevo gasto» arriba o abre Comida para añadir lo que has comido. En «Tu día» tienes los pasos de la mañana, la tarde y la noche.'});
-  if(modOn('gym'))L.push({t:'Importa tus entrenos',p:'En Gym pulsa «Sí, importar mi CSV». Vale el CSV de Hevy, Strong, Fitbod, FitNotes u otra app; si no lo reconozco, eliges tú las columnas.'});
-  if(modOn('gastos'))L.push({t:'Importa tu banco',p:'Al final de Gastos puedes subir el CSV de tu banco. Revisas las columnas, ves una vista previa y los movimientos repetidos se saltan.'});
-  L.push({t:'Ajusta la app a ti',p:'En Ajustes cambias tus objetivos (calorías, agua, sueño), la moneda, las categorías de gasto, los módulos que usas y tu perfil. Si tu gimnasio publica el aforo, pega aquí su enlace.'});
-  L.push({t:'Tus datos son tuyos',p:'Todo se guarda en este dispositivo. En Ajustes puedes hacer una copia de seguridad y restaurarla cuando quieras.'});
+  var L=[{tab:'escritorio',ill:'esc',t:'Tu escritorio',p:'Aquí empieza todo: el resumen de tu semana y el escritorio 3D. Pulsa una tarjeta o una zona del escenario para abrir ese módulo.'}];
+  if(modOn('gastos'))L.push({tab:'gastos',ill:'gastos',t:'Gastos',p:'Apunta lo que gastas y lo que ingresas, mira a dónde se va el dinero por categorías e importa el CSV de tu banco.'});
+  if(modOn('gym'))L.push({tab:'gym',ill:'gym',t:'Gym',p:'Registra tus entrenos y sigue las series por músculo cada semana. Importa tu CSV de Hevy, Strong, Fitbod, FitNotes u otra app.'});
+  if(modOn('comida'))L.push({tab:'comida',ill:'comida',t:'Comida',p:'Cuenta calorías y macros, guarda tus platos habituales y vuelve a añadirlos con un toque. El anillo se llena hacia tu objetivo.'});
+  if(modOn('cuerpo'))L.push({tab:'cuerpo',ill:'cuerpo',t:'Personal',p:'Peso, sueño, agua y medidas. Verás la evolución y la media mensual, no solo el último dato.'});
+  if(modOn('metas'))L.push({tab:'metas',ill:'metas',t:'Calendario',p:'Tus metas y tu constancia día a día: marca lo cumplido y mira la racha del mes.'});
+  L.push({tab:'ajustes',ill:'ajustes',t:'Ajustes',p:'Cambia tus objetivos, la moneda, las categorías, los módulos que usas y tu perfil. Si tu gimnasio publica el aforo, pega aquí su enlace.'});
+  L.push({tab:'ajustes',ill:'datos',t:'Tus datos son tuyos',p:'Todo se guarda en este dispositivo. En Ajustes haces una copia de seguridad y la restauras cuando quieras. Esta guía la repites desde tu perfil.'});
   return L;
+}
+function introPos(){
+  var el=document.getElementById('intro');if(!el)return;
+  var L=introSlides(),st=L[Math.max(0,Math.min(ui.intro||0,L.length-1))],sp=el.querySelector('.isp');
+  var cands=document.querySelectorAll('#side .tab[data-tab="'+st.tab+'"]'),r=null;
+  for(var k=0;k<cands.length;k++){var q=cands[k].getBoundingClientRect();if(q.width>0&&q.height>0){r=q;break}}
+  var pad=6;
+  if(r){sp.style.cssText='left:'+(r.left-pad)+'px;top:'+(r.top-pad)+'px;width:'+(r.width+pad*2)+'px;height:'+(r.height+pad*2)+'px;opacity:1'}
+  else{sp.style.cssText='left:50%;top:50%;width:0;height:0;opacity:1'}
 }
 function introRender(){
   var el=document.getElementById('intro');
   if(!(S.profile&&S.profile.onboarded)||S.profile.introDone){if(el)el.remove();return}
-  var L=introSlides(),i=Math.max(0,Math.min(ui.intro||0,L.length-1)),last=i===L.length-1;
-  if(!el){el=document.createElement('div');el.id='intro';el.className='onb';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','Guía de bienvenida');document.body.appendChild(el)}
-  el.innerHTML='<div class="card"><p class="ts" style="margin:0 0 8px">Paso '+(i+1)+' de '+L.length+'</p><h2>'+esc(L[i].t)+'</h2><p style="margin:0 0 16px;color:var(--ink2);font-size:16px;line-height:1.5">'+esc(L[i].p)+'</p><div class="tour-dots" style="margin:0 0 16px">'+L.map(function(x,j){return '<b class="'+(j<i?'ok':j===i?'cur':'')+'"></b>'}).join('')+'</div><div class="fa">'+(i>0?'<button class="btn" type="button" data-act="intback">Atrás</button>':'')+'<button class="btn primary" type="button" data-act="intnext" autofocus>'+(last?'Empezar':'Siguiente')+'</button>'+(last?'':'<button class="btn" type="button" data-act="intskip">Saltar guía</button>')+'</div></div>';
-  var b=el.querySelector('[data-act="intnext"]');if(b&&b.focus)try{b.focus()}catch(e){}
+  var L=introSlides(),i=Math.max(0,Math.min(ui.intro||0,L.length-1)),last=i===L.length-1,st=L[i];
+  var first=!el;
+  if(first){el=document.createElement('div');el.id='intro';el.setAttribute('role','dialog');el.setAttribute('aria-label','Guía de bienvenida');el.innerHTML='<div class="isp"></div><div class="gc"></div>';document.body.appendChild(el)}
+  var ic=el.querySelector('.gc');
+  ic.className='gc';void ic.offsetWidth;ic.className='gc in';
+  ic.innerHTML='<div class="iill">'+ILL[st.ill]+'</div><p class="ts" style="margin:0 0 4px">Paso '+(i+1)+' de '+L.length+'</p><h2>'+esc(st.t)+'</h2><p class="ip">'+esc(st.p)+'</p><div class="tour-dots" style="margin:0 0 14px">'+L.map(function(x,j){return '<b class="'+(j<i?'ok':j===i?'cur':'')+'"></b>'}).join('')+'</div><div class="fa">'+(i>0?'<button class="btn" type="button" data-act="intback">Atrás</button>':'')+'<button class="btn primary" type="button" data-act="intnext">'+(last?'Empezar':'Siguiente')+'</button>'+(last?'':'<button class="btn" type="button" data-act="intskip">Saltar guía</button>')+'</div>';
+  introPos();
+  var b=ic.querySelector('[data-act="intnext"]');if(b&&b.focus)try{b.focus({preventScroll:true})}catch(e){}
 }
+window.addEventListener('resize',function(){introPos()});
 var LEGAL_CARD='<div class="card"><h3>Información legal</h3><p class="ts" style="margin:0"><a href="legal/privacidad.html" target="_blank" rel="noopener">Privacidad</a> · <a href="legal/terminos.html" target="_blank" rel="noopener">Términos de uso y compra</a> · <a href="legal/aviso-legal.html" target="_blank" rel="noopener">Aviso legal</a> · <a href="legal/almacenamiento.html" target="_blank" rel="noopener">Cookies y almacenamiento</a></p></div>';
 function onbRender(){
   var el=document.getElementById('onb');
@@ -1881,10 +1958,10 @@ document.addEventListener('click',function(e){
   else if(a==='hvgo'){ui.gymYes=false;hevyGo()}
   else if(a==='hvno'){ui.hv=null;ui.hvmap=null;ui.hvmsg='';render()}
   else if(a==='hvmapgo'){var mp=ui.hvmap;if(mp){if(mp.ix.date<0||mp.ix.ex<0||mp.ix.w<0||mp.ix.r<0){ui.hvmsg='Elige al menos las columnas de fecha, ejercicio, peso y repeticiones.'}else{try{ui.hv=hvParseRows(mp.R,mp.ix,mp.unit,'CSV propio');ui.hvmap=null;ui.hvmsg=''}catch(err){ui.hvmsg='No se pudo leer con esas columnas ('+err.message+').'}}render()}}
-  else if(a==='intnext'){var n0=introSlides().length;if((ui.intro||0)>=n0-1){S.profile=Object.assign({},S.profile,{introDone:true});ui.intro=0;commit()}else{ui.intro=(ui.intro||0)+1;render()}}
-  else if(a==='intback'){ui.intro=Math.max(0,(ui.intro||0)-1);render()}
-  else if(a==='intskip'){S.profile=Object.assign({},S.profile,{introDone:true});ui.intro=0;commit()}
-  else if(a==='introagain'){S.profile=Object.assign({},S.profile,{introDone:false});ui.intro=0;commit()}
+  else if(a==='intnext'){var L0=introSlides(),n0=L0.length;if((ui.intro||0)>=n0-1){S.profile=Object.assign({},S.profile,{introDone:true});ui.intro=0;commit();go('escritorio')}else{ui.intro=(ui.intro||0)+1;go(L0[ui.intro].tab)}}
+  else if(a==='intback'){var L1=introSlides();ui.intro=Math.max(0,(ui.intro||0)-1);go(L1[ui.intro].tab)}
+  else if(a==='intskip'){S.profile=Object.assign({},S.profile,{introDone:true});ui.intro=0;commit();go('escritorio')}
+  else if(a==='introagain'){S.profile=Object.assign({},S.profile,{introDone:false});ui.intro=0;commit();go('escritorio')}
   else if(a==='bkno'){ui.bk=null;ui.bkmsg='';render()}
   else if(a==='bkgo'){bankGo()}
   else if(a==='sbsync'){sbSay('Sincronizando…');sbPull().then(function(){flush();sbSay('Sincronizado')})}
