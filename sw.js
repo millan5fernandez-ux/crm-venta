@@ -1,7 +1,7 @@
 /* Service worker: primero la red (siempre la versión nueva) y, sin conexión, la última copia guardada */
 const C='crm-venta-v1';
 self.addEventListener('install',()=>self.skipWaiting());
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C&&k.indexOf('crm-venta-')===0).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
   const r=e.request;if(r.method!=='GET')return;
   const u=new URL(r.url);
