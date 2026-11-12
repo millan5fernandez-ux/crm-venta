@@ -1,5 +1,6 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Bitácora</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<script>try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("gs")}catch(e){}</script>
 <meta name="description" content="Bitácora reúne gastos, gym, comida y cuerpo en un solo panel. Tus datos se quedan en tu dispositivo. 1,99 € de pago único.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -67,6 +68,7 @@ h1 em{font-style:italic}
 @keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .d1{animation-delay:.08s}.d2{animation-delay:.16s}.d3{animation-delay:.24s}.d4{animation-delay:.32s}.d5{animation-delay:.45s;animation-duration:.9s}
 @media (prefers-reduced-motion:reduce){.up,.blob{animation:none!important}}
+.gs .up{animation:none}
 
 /* panel de la app (maqueta) */
 .shot{margin-top:34px;width:100%;max-width:980px;border-radius:18px;padding:12px;background:var(--glass);border:1px solid var(--glass-line);box-shadow:var(--shadow);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);text-align:left;flex:1 0 auto}
@@ -188,19 +190,19 @@ footer a{text-decoration:none}footer a:hover{color:var(--ink)}
         <div class="main">
           <div class="top"><strong>Hola, Ana</strong><small>Jueves · ejemplo</small></div>
           <div class="tiles">
-            <div class="t hot"><small>Gasto del mes</small><b>412 €</b><em>ingresos 1.650 €</em></div>
-            <div class="t"><small>Calorías hoy</small><b>1.840</b><em>/ 2.200</em></div>
-            <div class="t"><small>Series semana</small><b>46</b><em>4 sesiones</em></div>
-            <div class="t"><small>Peso · media mes</small><b>71,8</b><em>kg</em></div>
+            <div class="t hot"><small>Gasto del mes</small><b data-n="412" data-s=" €">412 €</b><em>ingresos 1.650 €</em></div>
+            <div class="t"><small>Calorías hoy</small><b data-n="1840">1.840</b><em>/ 2.200</em></div>
+            <div class="t"><small>Series semana</small><b data-n="46">46</b><em>4 sesiones</em></div>
+            <div class="t"><small>Peso · media mes</small><b data-n="71.8" data-d="1">71,8</b><em>kg</em></div>
           </div>
           <div class="row2">
             <div class="card2">
               <h5>Peso · 90 días</h5>
               <svg class="chart" viewBox="0 0 400 80" preserveAspectRatio="none" role="presentation">
                 <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".22"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
-                <path d="M0 20 C40 18 60 26 100 30 S160 40 200 38 S270 52 310 56 S370 62 400 64 L400 80 L0 80Z" fill="url(#g1)"/>
-                <path d="M0 20 C40 18 60 26 100 30 S160 40 200 38 S270 52 310 56 S370 62 400 64" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
-                <circle cx="400" cy="64" r="3.2" fill="var(--accent)"/>
+                <path class="area" d="M0 20 C40 18 60 26 100 30 S160 40 200 38 S270 52 310 56 S370 62 400 64 L400 80 L0 80Z" fill="url(#g1)"/>
+                <path class="line" d="M0 20 C40 18 60 26 100 30 S160 40 200 38 S270 52 310 56 S370 62 400 64" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
+                <circle class="dot" cx="400" cy="64" r="3.2" fill="var(--accent)"/>
               </svg>
             </div>
             <div class="card2">
@@ -281,7 +283,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--ink)}
     <h2>Un precio, <em>sin sorpresas</em></h2>
     <div class="pricebox">
       <span class="tag">Precio de lanzamiento</span>
-      <div class="amount"><b>1,99 €</b><span>pago único</span></div>
+      <div class="amount"><b data-n="1.99" data-d="2" data-s=" €">1,99 €</b><span>pago único</span></div>
       <ul>
         <li>Todos los módulos: gastos, gym, comida, personal y calendario</li>
         <li>Importadores de CSV de gym y de banco</li>
@@ -321,6 +323,70 @@ footer a{text-decoration:none}footer a:hover{color:var(--ink)}
   </div>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+/* Animaciones: solo si GSAP cargó y no se pidió reducir movimiento. Sin ellas todo se ve igual, ya colocado. */
+(function(){
+  if(!window.gsap||!document.documentElement.classList.contains('gs'))return;
+  var hasST=!!window.ScrollTrigger;if(hasST)gsap.registerPlugin(ScrollTrigger);
+  var $=function(q,r){return (r||document).querySelector(q)},$$=function(q,r){return Array.prototype.slice.call((r||document).querySelectorAll(q))};
+  var fmt=function(v,d){return v.toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d,useGrouping:'always'})};
+  function count(el,delay,trigger){
+    var n=parseFloat(el.dataset.n),d=+el.dataset.d||0,suf=el.dataset.s||'',o={v:0};
+    el.textContent=fmt(0,d)+suf;
+    var cfg={v:n,duration:1.4,delay:delay||0,ease:'power2.out',onUpdate:function(){el.textContent=fmt(o.v,d)+suf},onComplete:function(){el.textContent=fmt(n,d)+suf}};
+    if(trigger&&hasST)cfg.scrollTrigger={trigger:trigger,start:'top 85%',once:true};
+    gsap.to(o,cfg);
+  }
+  /* titular: palabra a palabra */
+  var h1=$('h1');
+  (function split(node){
+    Array.prototype.slice.call(node.childNodes).forEach(function(c){
+      if(c.nodeType===3){
+        var frag=document.createDocumentFragment();
+        c.textContent.split(/(\s+)/).forEach(function(p){
+          if(!p)return;
+          if(/^\s+$/.test(p)){frag.appendChild(document.createTextNode(' '));return}
+          var w=document.createElement('span');w.className='w';w.style.display='inline-block';w.textContent=p;frag.appendChild(w);
+        });
+        c.parentNode.replaceChild(frag,c);
+      }else if(c.nodeType===1)split(c);
+    });
+  })(h1);
+  var tl=gsap.timeline({defaults:{ease:'power3.out'}});
+  tl.from('.badge',{y:12,opacity:0,duration:.5})
+    .from($$('.w',h1),{y:46,opacity:0,rotate:2,duration:.8,stagger:.07},'-=.2')
+    .from('.sub',{y:16,opacity:0,duration:.6},'-=.5')
+    .from('.cta > *',{y:16,opacity:0,duration:.5,stagger:.1},'-=.4')
+    .from('.price-note',{opacity:0,duration:.5},'-=.3')
+    .from('.shot',{y:70,opacity:0,duration:1,ease:'power3.out'},'-=.7');
+  /* panel: contadores, gráfico, pasos */
+  $$('.tiles b').forEach(function(b,i){count(b,1.6+i*.08)});
+  var line=$('.line'),area=$('.area'),dot=$('.dot');
+  if(line&&line.getTotalLength){
+    var L=line.getTotalLength();
+    gsap.set(line,{strokeDasharray:L,strokeDashoffset:L});gsap.set(area,{opacity:0});gsap.set(dot,{opacity:0,scale:0,transformOrigin:'50% 50%'});
+    gsap.to(line,{strokeDashoffset:0,duration:1.6,delay:1.9,ease:'power2.inOut'});
+    gsap.to(area,{opacity:1,duration:1,delay:2.6});
+    gsap.to(dot,{opacity:1,scale:1,duration:.4,delay:3.4,ease:'back.out(3)'});
+  }
+  $$('.steps div.ok').forEach(function(d,i){d.classList.remove('ok');gsap.delayedCall(2.3+i*.55,function(){d.classList.add('ok')})});
+  /* parallax del panel al bajar */
+  if(hasST&&matchMedia('(min-width:761px)').matches)gsap.to('.shot',{yPercent:-6,ease:'none',scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:.6}});
+  /* secciones */
+  if(hasST){
+    var reveal=function(targets,trigger,opts){
+      var els=$$(targets);if(!els.length)return;
+      gsap.from(els,Object.assign({y:28,opacity:0,duration:.7,ease:'power3.out',stagger:.08,clearProps:'transform,opacity',scrollTrigger:{trigger:trigger,start:'top 85%',once:true}},opts||{}));
+    };
+    ['#que-hace','#importa','#datos','#precio','#faq'].forEach(function(id){reveal(id+' .eyebrow, '+id+' h2, '+id+' .lead',id,{stagger:.1})});
+    reveal('.mod','.mods');reveal('.chip','.chips',{stagger:.06});reveal('.csv','.csv');reveal('.facts li','.facts');
+    reveal('.pricebox','.pricebox',{y:40,duration:.9});reveal('details','.faq');
+    var amt=$('.amount b');if(amt)count(amt,0,'.pricebox');
+  }
+})();
+</script>
 <script>
 /* Configuración de venta: pega aquí el enlace de pago (Lemon Squeezy, Paddle…) y, opcional, el de lista de espera. */
 var CHECKOUT_URL='';
