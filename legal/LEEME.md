@@ -23,3 +23,6 @@ Plantillas para rellenar. Todo lo que aparece resaltado entre corchetes `[ASÍ]`
 4. El correo de confirmación de compra.
 
 Son plantillas generales y no sustituyen el asesoramiento de un abogado o gestor.
+
+## Estado (13-nov-2026)
+Ya están ajustados a: pago único, sin cuentas, sin analítica y alojado en GitHub Pages. Solo quedan por rellenar los campos resaltados con `[ ]`: nombre, NIF, dirección, correo y la plataforma de pago. Si en el futuro activas cuentas o analítica, hay que actualizar estos textos.
