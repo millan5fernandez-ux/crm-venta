@@ -1,4 +1,4 @@
-# Bitácora (crm-venta)
+# Zancal (crm-venta)
 
 Panel personal todo en uno: gastos, gym, comida, peso y calendario, con una escena 3D isométrica. Versión preparada para vender, derivada de `crm`.
 

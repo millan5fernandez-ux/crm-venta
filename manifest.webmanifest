@@ -1,6 +1,6 @@
 {
- "name": "Bitácora",
- "short_name": "Bitácora",
+ "name": "Zancal",
+ "short_name": "Zancal",
  "description": "Gastos, gym, comida y días en un dashboard.",
  "start_url": "./",
  "scope": "./",

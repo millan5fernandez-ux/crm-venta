@@ -1,4 +1,4 @@
-# Textos legales de Bitácora
+# Textos legales de Zancal
 
 Plantillas para rellenar. Todo lo que aparece resaltado entre corchetes `[ASÍ]` hay que sustituirlo o borrarlo.
 

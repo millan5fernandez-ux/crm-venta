@@ -1,7 +1,7 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#ff3b3b"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Bitácora"><meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>Bitácora</title>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#ff3b3b"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Zancal"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Zancal</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23ff3b3b%22/%3E%3Cpath d=%22M7 25V7h4l5 8 5-8h4v18h-4V14.5l-4.2 6.6h-1.6L11 14.5V25z%22 fill=%22%230b0b0b%22/%3E%3Crect x=%2225%22 y=%223%22 width=%224%22 height=%224%22 fill=%22%230b0b0b%22/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23ff3b3b%22/%3E%3Cpath d=%22M8 7h16v4L13.5 21H24v4H8v-4L18.5 11H8z%22 fill=%22%230b0b0b%22/%3E%3Crect x=%2225%22 y=%223%22 width=%224%22 height=%224%22 fill=%22%230b0b0b%22/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
 /* Layout: cabecera fija con pestañas; cada módulo = fila de tarjetas (formulario, métricas, gráficas) y lista editable debajo. */
@@ -831,8 +831,8 @@ body.drawer-open #dayflow{display:none}
 <div id="app">
   <header id="top">
     <a class="logo" href="#escritorio" data-go="escritorio" aria-label="Ir al escritorio">
-      <span class="logo-mark"><svg viewBox="0 0 32 32" aria-hidden="true" style="width:26px;height:26px;fill:currentColor;stroke:none"><text x="15" y="26" text-anchor="middle" font-size="27" font-weight="900" font-family="Archivo,Arial Black,sans-serif">B</text><rect x="25" y="3" width="4" height="4"/></svg></span>
-      <span class="logo-t"><strong>Bitácora</strong><small id="hdate"></small></span>
+      <span class="logo-mark"><svg viewBox="0 0 32 32" aria-hidden="true" style="width:26px;height:26px;fill:currentColor;stroke:none"><text x="15" y="26" text-anchor="middle" font-size="27" font-weight="900" font-family="Archivo,Arial Black,sans-serif">Z</text><rect x="25" y="3" width="4" height="4"/></svg></span>
+      <span class="logo-t"><strong>Zancal</strong><small id="hdate"></small></span>
     </a>
   </header>
   <nav id="side" class="tabs" aria-label="Módulos"><p class="navh">Módulos</p><a class="tab" href="#escritorio" data-tab="escritorio" title="Escritorio"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg><span>Escritorio</span></a><a class="tab" href="#resumen" data-tab="resumen" title="Resumen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-6"/></svg><span>Resumen</span></a><a class="tab" href="#gastos" data-tab="gastos" title="Gastos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.6 9.4c-.5-.9-1.4-1.4-2.6-1.4-1.5 0-2.6.8-2.6 2s1 1.6 2.6 2 2.6.8 2.6 2-1.1 2-2.6 2c-1.2 0-2.1-.5-2.6-1.4M12 6.5V8M12 16v1.5"/></svg><span>Gastos</span></a><a class="tab" href="#gym" data-tab="gym" title="Gym"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7v10M3.5 9.5v5M17.5 7v10M20.5 9.5v5M6.5 12h11"/></svg><span>Gym</span></a><a class="tab" href="#comida" data-tab="comida" title="Comida"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v7a2 2 0 0 0 2 2v9M7 3v5M11 3v5a2 2 0 0 1-2 2M17 21V3c-2 1.4-3 4-3 7s1 4 3 4"/></svg><span>Comida</span></a><a class="tab" href="#cuerpo" data-tab="cuerpo" title="Personal"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg><span>Personal</span></a><a class="tab" href="#metas" data-tab="metas" title="Calendario"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Calendario</span></a><a class="tab setgear" href="#ajustes" data-tab="ajustes" title="Ajustes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Ajustes</span></a></nav>
@@ -1849,7 +1849,7 @@ function onbRender(){
   if(S.profile&&S.profile.onboarded){if(el)el.remove();return}
   if(el)return;
   el=document.createElement('div');el.id='onb';el.className='onb';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','Bienvenida');
-  el.innerHTML='<form class="card" data-form="onb" autocomplete="off"><h2>Bienvenido a Bitácora</h2><p style="margin:0 0 14px;color:var(--ink2)">Tus datos se guardan en este dispositivo. Elige qué quieres usar; podrás cambiarlo cuando quieras en Ajustes.</p><div class="fg">'+
+  el.innerHTML='<form class="card" data-form="onb" autocomplete="off"><h2>Bienvenido a Zancal</h2><p style="margin:0 0 14px;color:var(--ink2)">Tus datos se guardan en este dispositivo. Elige qué quieres usar; podrás cambiarlo cuando quieras en Ajustes.</p><div class="fg">'+
     fld('onb','name','¿Cómo te llamas?','text','','maxlength="30" autocomplete="given-name"','full')+
     '<div class="f full"><span>¿Qué quieres controlar?</span><div class="mods">'+MODS.map(function(m){return '<label><input type="checkbox" name="mod_'+m[0]+'" checked> '+m[1]+'</label>'}).join('')+'</div></div>'+
     '<div class="f full"><span>Escritorio</span><div class="mods"><label><input type="checkbox" name="dayflow" checked> <span>Mostrar «Tu día»: pasos del día y recorrido guiado</span></label></div></div>'+
@@ -2218,7 +2218,7 @@ function renderHud(){
   }
   var lm=moodOf(latestMood());
   var vals={resumen:'Mi día',gastos:eur(k.gm)+' este mes',gym:(function(){var gd=S.gymdays.filter(function(g){return g.date===t})[0];return gd?(gd.went?'Hoy: '+((gd.routine||[]).join(' + ')||'he ido'):'Hoy: descanso'):num(k.sets)+' series'})(),comida:num(k.kc)+' kcal hoy',cuerpo:(k.w!=null?num(k.w,1)+' kg':'Peso y ánimo')+(lm?' · '+lm.l:''),metas:np?relDay(np.date)+': '+(np.title.length>16?np.title.slice(0,15)+'…':np.title):'Sin planes'};
-  var bs=$('.brand strong');if(bs)bs.textContent='Bitácora';
+  var bs=$('.brand strong');if(bs)bs.textContent='Zancal';
   document.querySelectorAll('[data-tv]').forEach(function(s){s.textContent=vals[s.dataset.tv]||''});
   if(scene3d){scene3d.screen();scene3d.mood(latestMood())}
 }
@@ -2299,7 +2299,7 @@ function initScene(){
     var k=kpis();
     var g=sx.createLinearGradient(0,0,560,300);g.addColorStop(0,'#0d1a12');g.addColorStop(1,'#080c0a');
     sx.fillStyle=g;sx.fillRect(0,0,560,300);
-    sx.textAlign='left';sx.fillStyle='#1ed760';sx.font='700 24px system-ui,sans-serif';sx.fillText('Bitácora',24,42);
+    sx.textAlign='left';sx.fillStyle='#1ed760';sx.font='700 24px system-ui,sans-serif';sx.fillText('Zancal',24,42);
     sx.fillStyle='#8a939b';sx.font='15px system-ui,sans-serif';
     sx.fillText(new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}),24,64);
     var rows=[['Balance del mes',k.inc>0?Math.max(0,k.inc-k.gm)/k.inc:0,eur(k.inc-k.gm),'#d9a21a'],['Calorías hoy',k.kc/S.set.kcal,num(k.kc)+' kcal','#1baf7a'],['Series de la semana',k.sets/totGoal(),num(k.sets)+' series','#eb6834']];
