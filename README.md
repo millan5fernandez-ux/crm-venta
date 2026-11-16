@@ -25,3 +25,6 @@ En `index.html`, busca `var SB={url:'',key:'',ls:'bitacora-sb'}` y rellena la UR
 
 ## Probar en local
 Abre `index.html` desde un servidor estático (por ejemplo `python3 -m http.server`).
+
+## Acceso por clave
+Cada pedido de Shopify genera una clave (HMAC del nº de pedido con un secreto que solo está en la plantilla privada del email). La app guarda solo las huellas de las claves válidas (`LIC_H`) y las comprueba en el dispositivo. El secreto NO está en este repo.
