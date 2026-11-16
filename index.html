@@ -846,6 +846,11 @@ body.drawer-open #dayflow{display:none}
 #lic .lm{min-height:20px;margin:10px 0 0;font:600 13px var(--font-body);color:var(--bad)}
 #lic .lf{border-top:2px solid var(--edge);background:var(--soft);padding:12px 20px;font:12px/1.7 var(--font-mono);color:var(--muted)}
 #lic .lf a{color:var(--ink)}
+
+/* ======== Instalar en el móvil ======== */
+.inst{margin:0 0 12px;padding-left:22px;display:grid;gap:6px;font-size:14px;line-height:1.45;color:var(--ink2)}
+.inst b{color:var(--ink)}
+#intro .gc{max-height:calc(100dvh - 48px);overflow:auto}
 </style>
 <div id="app">
   <header id="top">
@@ -1700,7 +1705,7 @@ VIEWS.ajustes=function(){
     MAIN.map(function(m){return '<div class="f"><span>'+esc(m)+'</span><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><input type="number" name="lo_'+esc(m)+'" aria-label="'+esc(m)+' mínimo" min="0" max="60" step="1" inputmode="numeric" value="'+GOALS[m][0]+'" required><input type="number" name="hi_'+esc(m)+'" aria-label="'+esc(m)+' máximo" min="0" max="60" step="1" inputmode="numeric" value="'+GOALS[m][1]+'" required></div></div>'}).join('')+
     '</div><p class="ts">Izquierda: mínimo · derecha: máximo.</p><div class="fa"><button class="btn primary" type="submit">Guardar series</button><button class="btn" type="button" data-act="goalsreset">Restablecer</button></div></form>';
   return '<div class="bar"><h2>Ajustes</h2></div>'+sbCard()+snapCard()+'<div class="grid">'+perfil+metas+'</div>'+gl+
-  '<div class="card"><h3>Datos</h3><p style="margin:0 0 10px;color:var(--ink2)">'+S.gastos.length+' gastos · '+S.gym.length+' ejercicios · '+S.comida.length+' comidas · '+S.cuerpo.length+' registros personales · '+S.plans.length+' planes</p><div class="fa" style="margin-top:0"><button class="btn" data-act="copy">Copiar copia de seguridad</button><button class="btn danger" data-act="reset">'+(ui.reset?'Confirmar: borrar todo':'Borrar todos los datos')+'</button>'+(ui.reset?'<button class="btn" data-act="reset-no">Cancelar</button>':'')+'</div>'+(ui.backup?'<p class="ts">Selecciona y copia este texto:</p><textarea readonly id="bk">'+esc(ui.backup)+'</textarea>':'')+'<h3 style="margin-top:16px">Importar copia de seguridad</h3><p class="ts" style="margin:0 0 8px">Pega aquí el texto copiado de otra versión de tu panel. Sustituye los datos actuales.</p><textarea id="imp" aria-label="Copia de seguridad a importar" placeholder="Pega aquí la copia"></textarea><div class="fa"><button class="btn primary" data-act="import">Importar</button></div>'+(ui.impmsg?'<p class="ts">'+esc(ui.impmsg)+'</p>':'')+'</div>'+LEGAL_CARD;
+  '<div class="card"><h3>Datos</h3><p style="margin:0 0 10px;color:var(--ink2)">'+S.gastos.length+' gastos · '+S.gym.length+' ejercicios · '+S.comida.length+' comidas · '+S.cuerpo.length+' registros personales · '+S.plans.length+' planes</p><div class="fa" style="margin-top:0"><button class="btn" data-act="copy">Copiar copia de seguridad</button><button class="btn danger" data-act="reset">'+(ui.reset?'Confirmar: borrar todo':'Borrar todos los datos')+'</button>'+(ui.reset?'<button class="btn" data-act="reset-no">Cancelar</button>':'')+'</div>'+(ui.backup?'<p class="ts">Selecciona y copia este texto:</p><textarea readonly id="bk">'+esc(ui.backup)+'</textarea>':'')+'<h3 style="margin-top:16px">Importar copia de seguridad</h3><p class="ts" style="margin:0 0 8px">Pega aquí el texto copiado de otra versión de tu panel. Sustituye los datos actuales.</p><textarea id="imp" aria-label="Copia de seguridad a importar" placeholder="Pega aquí la copia"></textarea><div class="fa"><button class="btn primary" data-act="import">Importar</button></div>'+(ui.impmsg?'<p class="ts">'+esc(ui.impmsg)+'</p>':'')+'</div>'+installCard()+LEGAL_CARD;
 };
 LISTS.cuerpo=function(){
   var it=S.cuerpo.slice().sort(cmpDesc).slice(0,40);
@@ -1829,7 +1834,24 @@ comida:'<svg viewBox="0 0 120 70" aria-hidden="true"><circle cx="60" cy="35" r="
 cuerpo:'<svg viewBox="0 0 120 70" aria-hidden="true"><polyline class="i-line" points="6,56 28,44 50,50 72,28 94,34 114,12"/><circle class="i-dot" cx="114" cy="12" r="5"/></svg>',
 metas:'<svg viewBox="0 0 120 70" aria-hidden="true"><rect x="8" y="8" width="104" height="54" rx="6" class="i-trk"/><g class="i-chk"><path d="M20 30l6 6 10-12"/><path d="M52 30l6 6 10-12"/><path d="M84 30l6 6 10-12"/><path d="M36 48l6 6 10-12"/></g></svg>',
 ajustes:'<svg viewBox="0 0 120 70" aria-hidden="true"><g class="i-trk"><rect x="12" y="14" width="96" height="6" rx="3"/><rect x="12" y="34" width="96" height="6" rx="3"/><rect x="12" y="54" width="96" height="6" rx="3"/></g><circle class="i-k1" cx="30" cy="17" r="7"/><circle class="i-k2" cx="80" cy="37" r="7"/><circle class="i-k3" cx="50" cy="57" r="7"/></svg>',
+movil:'<svg viewBox="0 0 120 70" aria-hidden="true"><rect class="i-trk" x="43" y="5" width="34" height="60" rx="7"/><path class="i-tick" d="M60 24v20M50 34h20"/></svg>',
 datos:'<svg viewBox="0 0 120 70" aria-hidden="true"><path class="i-shield" d="M60 6l26 9v18c0 16-11 26-26 31C45 59 34 49 34 33V15z"/><path class="i-tick" d="M48 34l9 9 16-18"/></svg>'};
+
+/* ======== Instalar en el móvil ======== */
+var instEv=null;
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();instEv=e});
+function isStandalone(){try{return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true}catch(e){return false}}
+function platform(){var u=navigator.userAgent||'';if(/iPhone|iPad|iPod/.test(u)||(/Macintosh/.test(u)&&navigator.maxTouchPoints>1))return 'ios';if(/Android/.test(u))return 'android';return 'desk'}
+function installHtml(){
+  var p=platform(),st={
+    ios:['Abre Zancal en <b>Safari</b>.','Pulsa <b>Compartir</b> (el cuadrado con una flecha hacia arriba).','Desliza y elige <b>«Añadir a pantalla de inicio»</b>.','Pulsa <b>«Añadir»</b>. Ya tienes el icono Z en tu móvil.'],
+    android:['Abre Zancal en <b>Chrome</b>.','Pulsa el menú <b>⋮</b> (arriba a la derecha).','Elige <b>«Instalar app»</b> o <b>«Añadir a pantalla de inicio»</b>.','Confirma. El icono Z aparecerá en tu pantalla.'],
+    desk:['En tu móvil, abre <b>app.zancal.com</b> e introduce tu clave.','<b>iPhone:</b> Safari → Compartir → «Añadir a pantalla de inicio».','<b>Android:</b> Chrome → menú ⋮ → «Instalar app».']}[p];
+  var h='<ol class="inst">'+st.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ol>';
+  if(instEv&&p!=='ios')h+='<div class="fa" style="margin:0 0 10px"><button class="btn primary" type="button" data-act="install">Instalar ahora</button></div>';
+  return h+'<p class="ts" style="margin:0">En cada dispositivo pones la clave una vez. Los datos no se pasan solos: exporta una copia en Ajustes y restáurala en el otro.</p>';
+}
+function installCard(){return isStandalone()?'':'<div class="card"><h3>Instalar en el móvil</h3>'+installHtml()+'</div>'}
 function introSlides(){
   var L=[{tab:'escritorio',ill:'esc',t:'Tu escritorio',p:'Aquí empieza todo: el resumen de tu semana y el escritorio 3D. Pulsa una tarjeta o una zona del escenario para abrir ese módulo.'}];
   if(modOn('gastos'))L.push({tab:'gastos',ill:'gastos',t:'Gastos',p:'Apunta lo que gastas y lo que ingresas, mira a dónde se va el dinero por categorías e importa el CSV de tu banco.'});
@@ -1839,6 +1861,7 @@ function introSlides(){
   if(modOn('metas'))L.push({tab:'metas',ill:'metas',t:'Calendario',p:'Tus metas y tu constancia día a día: marca lo cumplido y mira la racha del mes.'});
   L.push({tab:'ajustes',ill:'ajustes',t:'Ajustes',p:'Cambia tus objetivos, la moneda, las categorías, los módulos que usas y tu perfil. Si tu gimnasio publica el aforo, pega aquí su enlace.'});
   L.push({tab:'ajustes',ill:'datos',t:'Tus datos son tuyos',p:'Todo se guarda en este dispositivo. En Ajustes haces una copia de seguridad y la restauras cuando quieras. Esta guía la repites desde tu perfil.'});
+  if(!isStandalone())L.push({tab:'ajustes',ill:'movil',t:'Ponla en tu móvil',html:installHtml});
   return L;
 }
 function introPos(){
@@ -1858,7 +1881,7 @@ function introRender(){
   if(first){el=document.createElement('div');el.id='intro';el.setAttribute('role','dialog');el.setAttribute('aria-label','Guía de bienvenida');el.innerHTML='<div class="isp"></div><div class="gc"></div>';document.body.appendChild(el)}
   var ic=el.querySelector('.gc');
   ic.className='gc';void ic.offsetWidth;ic.className='gc in';
-  ic.innerHTML='<div class="iill">'+ILL[st.ill]+'</div><p class="ts" style="margin:0 0 4px">Paso '+(i+1)+' de '+L.length+'</p><h2>'+esc(st.t)+'</h2><p class="ip">'+esc(st.p)+'</p><div class="tour-dots" style="margin:0 0 14px">'+L.map(function(x,j){return '<b class="'+(j<i?'ok':j===i?'cur':'')+'"></b>'}).join('')+'</div><div class="fa">'+(i>0?'<button class="btn" type="button" data-act="intback">Atrás</button>':'')+'<button class="btn primary" type="button" data-act="intnext">'+(last?'Empezar':'Siguiente')+'</button>'+(last?'':'<button class="btn" type="button" data-act="intskip">Saltar guía</button>')+'</div>';
+  ic.innerHTML='<div class="iill">'+ILL[st.ill]+'</div><p class="ts" style="margin:0 0 4px">Paso '+(i+1)+' de '+L.length+'</p><h2>'+esc(st.t)+'</h2>'+(st.html?'<div class="ip">'+st.html()+'</div>':'<p class="ip">'+esc(st.p)+'</p>')+'<div class="tour-dots" style="margin:0 0 14px">'+L.map(function(x,j){return '<b class="'+(j<i?'ok':j===i?'cur':'')+'"></b>'}).join('')+'</div><div class="fa">'+(i>0?'<button class="btn" type="button" data-act="intback">Atrás</button>':'')+'<button class="btn primary" type="button" data-act="intnext">'+(last?'Empezar':'Siguiente')+'</button>'+(last?'':'<button class="btn" type="button" data-act="intskip">Saltar guía</button>')+'</div>';
   introPos();
   var b=ic.querySelector('[data-act="intnext"]');if(b&&b.focus)try{b.focus({preventScroll:true})}catch(e){}
 }
@@ -1995,6 +2018,7 @@ document.addEventListener('click',function(e){
   else if(a==='hvgo'){ui.gymYes=false;hevyGo()}
   else if(a==='hvno'){ui.hv=null;ui.hvmap=null;ui.hvmsg='';render()}
   else if(a==='hvmapgo'){var mp=ui.hvmap;if(mp){if(mp.ix.date<0||mp.ix.ex<0||mp.ix.w<0||mp.ix.r<0){ui.hvmsg='Elige al menos las columnas de fecha, ejercicio, peso y repeticiones.'}else{try{ui.hv=hvParseRows(mp.R,mp.ix,mp.unit,'CSV propio');ui.hvmap=null;ui.hvmsg=''}catch(err){ui.hvmsg='No se pudo leer con esas columnas ('+err.message+').'}}render()}}
+  else if(a==='install'){if(instEv){try{instEv.prompt()}catch(x){}instEv=null}}
   else if(a==='intnext'){var L0=introSlides(),n0=L0.length;if((ui.intro||0)>=n0-1){S.profile=Object.assign({},S.profile,{introDone:true});ui.intro=0;commit();go('escritorio')}else{ui.intro=(ui.intro||0)+1;go(L0[ui.intro].tab)}}
   else if(a==='intback'){var L1=introSlides();ui.intro=Math.max(0,(ui.intro||0)-1);go(L1[ui.intro].tab)}
   else if(a==='intskip'){S.profile=Object.assign({},S.profile,{introDone:true});ui.intro=0;commit();go('escritorio')}
