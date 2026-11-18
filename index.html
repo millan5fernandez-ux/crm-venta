@@ -846,7 +846,7 @@ body.drawer-open #dayflow{display:none}
 #lic input{font:700 18px var(--font-mono);letter-spacing:.1em;text-transform:uppercase;border:2px solid var(--edge);background:var(--card);color:var(--ink);border-radius:0;padding:14px 10px;text-align:center;width:100%}
 #lic .lbtn{width:100%;margin-top:12px;background:var(--accent);color:#0b0b0b;border:2px solid var(--edge);border-radius:0;padding:14px;font:700 14px var(--font-mono);letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
 #lic .lbtn:hover{filter:brightness(.95)}
-#lic .lm{min-height:20px;margin:10px 0 0;font:600 13px var(--font-body);color:var(--bad)}
+#lic .ls{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font:13px/1.45 var(--font-body);color:var(--ink2);cursor:pointer}#lic .ls input{width:18px;height:18px;margin:1px 0 0;flex:none;padding:0;accent-color:var(--accent)}#lic .lm{min-height:20px;margin:10px 0 0;font:600 13px var(--font-body);color:var(--bad)}
 #lic .lf{border-top:2px solid var(--edge);background:var(--soft);padding:12px 20px;font:12px/1.7 var(--font-mono);color:var(--muted)}
 #lic .lf a{color:var(--ink)}
 
@@ -900,7 +900,7 @@ body.drawer-open #dayflow{display:none}
       </section>
     </div>
   </div>
-<div id="lic" hidden role="dialog" aria-modal="true" aria-labelledby="lic-t"><div class="lc"><div class="lh"><span class="lz">Z</span><span class="lt">Zancal</span></div><form class="lb" autocomplete="off" novalidate><div class="le">// Acceso</div><h1 id="lic-t">Introduce <span>tu clave</span></h1><p>La encontrarás en el email de confirmación de tu compra (mira también en spam).</p><input name="k" inputmode="text" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="19" placeholder="XXXX-XXXX-XXXX-XXXX" aria-label="Clave de acceso"><button class="lbtn" type="submit">Activar</button><div class="lm" role="alert" aria-live="polite"></div></form><div class="lf">La clave se comprueba en tu dispositivo; no se envía ningún dato.<br>¿Aún no tienes Zancal? <a href="https://zancal.com" target="_blank" rel="noopener">zancal.com</a><br>¿Problemas? <a href="mailto:millanadsense@gmail.com">millanadsense@gmail.com</a></div></div></div>
+<div id="lic" hidden role="dialog" aria-modal="true" aria-labelledby="lic-t"><div class="lc"><div class="lh"><span class="lz">Z</span><span class="lt">Zancal</span></div><form class="lb" autocomplete="off" novalidate><div class="le">// Acceso</div><h1 id="lic-t">Introduce <span>tu clave</span></h1><p>La encontrarás en el email de confirmación de tu compra (mira también en spam).</p><input name="k" inputmode="text" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="19" placeholder="XXXX-XXXX-XXXX-XXXX" aria-label="Clave de acceso"><label class="ls" id="lic-sync" hidden><input type="checkbox" name="s" checked><span>Sincronizar mis datos entre dispositivos (cifrado). Si ya los tienes en la nube, se cargan ahora.</span></label><button class="lbtn" type="submit">Activar</button><div class="lm" role="alert" aria-live="polite"></div></form><div class="lf">La clave se comprueba en tu dispositivo y nunca se envía.<br>¿Aún no tienes Zancal? <a href="https://zancal.com" target="_blank" rel="noopener">zancal.com</a><br>¿Problemas? <a href="mailto:millanadsense@gmail.com">millanadsense@gmail.com</a></div></div></div>
 <aside id="drawer" aria-label="Módulo" aria-hidden="true">
     <div class="dhead"><h2 id="dtitle"></h2><button class="btn" data-go="escritorio" aria-label="Cerrar módulo">✕ Cerrar</button></div>
     <div id="view"></div>
@@ -1080,12 +1080,13 @@ function sbStart(){
   sbReady=false;
   dbDoc={set:function(o){return vEnc(o).then(function(b){return sbReq('vault_put',{p_id:sbS.id,p_blob:b,p_rev:o.rev||0,p_prev:sbBase()})}).then(function(ok){if(ok===false){setSync('Otro dispositivo guardó cambios; uniendo…');setTimeout(function(){sbPull(true)},400);return}sbBase(o.rev||0);sbLink()})}};
   setSync('Conectando con la nube…');
-  sbPull(true).then(function(){render()});
+  var pp=sbPull(true).then(function(){render()});
   if(!sbStart.on){sbStart.on=1;
     document.addEventListener('visibilitychange',function(){if(!document.hidden&&sbS)sbPull()});
     window.addEventListener('online',function(){if(sbS)sbPull()});
     setInterval(function(){if(sbS&&!document.hidden)sbPull()},60000);
   }
+  return pp;
 }
 function sbEnable(){
   var inp=[$('#sb-key'),$('#ac-key')].filter(function(x){return x&&x.value})[0]||$('#ac-key')||$('#sb-key'),v=licNorm(inp&&inp.value);
@@ -2826,11 +2827,16 @@ function licInit(){
   function unlock(){el.hidden=true;if(app)app.removeAttribute('inert')}
   function lock(){el.hidden=false;if(app)app.setAttribute('inert','');var i=el.querySelector('input');if(i)setTimeout(function(){try{i.focus()}catch(e){}},60)}
   if(licHas(st))unlock();else lock();
+  var ls=el.querySelector('#lic-sync');if(ls&&SB.url&&vOk())ls.hidden=false;
   var f=el.querySelector('form'),inp=f.querySelector('input'),msg=f.querySelector('.lm');
   inp.addEventListener('input',function(){var v=licNorm(inp.value);inp.value=v.replace(/(.{4})(?=.)/g,'$1-');msg.textContent=''});
   f.addEventListener('submit',function(e){e.preventDefault();
     var v=licNorm(inp.value),h=v.length===16?sha256hex(v).slice(0,16):'';
-    if(licHas(h)){try{localStorage.setItem(LIC_K,h)}catch(x){}unlock()}
+    if(licHas(h)){try{localStorage.setItem(LIC_K,h)}catch(x){}
+      var cb=f.querySelector('input[name=s]');
+      if(cb&&cb.checked&&!sbS&&SB.url&&vOk()){msg.style.color='var(--ink2)';msg.textContent='Buscando tus datos en la nube…';var done=0,go=function(){if(done)return;done=1;msg.textContent='';msg.style.color='';unlock()};setTimeout(go,9000);
+        vKeys(v).then(function(o){sbStore({id:o.id,k:o.k,t:Date.now()});return sbStart()}).then(go,go)}
+      else unlock()}
     else msg.textContent=v.length<16?'La clave está incompleta (16 caracteres).':'Clave no válida. Revisa que la has copiado entera.'});
 }
 
