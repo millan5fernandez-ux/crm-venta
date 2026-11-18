@@ -964,7 +964,7 @@ try{var raw=localStorage.getItem(LS);if(raw){var o=JSON.parse(raw);if(o&&o.v===1
 var PLATO_SEED=[];
 try{if(PLATO_SEED.length&&!localStorage.getItem(LS+'-seedp')){PLATO_SEED.forEach(function(p){if(!S.platos.some(function(x){return x.id===p.id}))S.platos.push(p)});localStorage.setItem(LS+'-seedp','1')}}catch(e){}
 /* Para activar cuentas y sincronización: pon aquí la URL y la clave pública de tu proyecto Supabase. Vacío = solo datos locales. */
-var SB={url:'',key:'',ls:'bitacora-venta-sb'};
+var SB={url:'https://foiwmapayenuqbwtjatp.supabase.co',key:'sb_publishable_zLa2DMEAIpMC6uBgmT8CWA_HYNr7Hhn',ls:'bitacora-venta-sb'};
 var sbS=null,sbNote='',sbArm=0;
 function sbStore(o){sbS=o;try{if(o)localStorage.setItem(SB.ls,JSON.stringify(o));else localStorage.removeItem(SB.ls)}catch(e){}}
 try{var _r=localStorage.getItem(SB.ls);if(_r){var _o=JSON.parse(_r);if(_o&&_o.id&&_o.k)sbS=_o}}catch(e){}
@@ -1028,7 +1028,7 @@ function snap(why){
 var SYNC_LISTS=['gastos','ingresos','gym','comida','cuerpo','plans','gymdays','routines','ingr','platos'];
 function sbSay(t){sbNote=t;var e=$('#sbmsg');if(e)e.textContent=t;var a=$('#acmsg');if(a)a.textContent=t}
 function sbReq(fn,args){
-  return fetch(SB.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SB.key,Authorization:'Bearer '+SB.key,'Content-Type':'application/json'},body:JSON.stringify(args)}).then(function(r){
+  return fetch(SB.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:SB.key.indexOf('eyJ')===0?{apikey:SB.key,Authorization:'Bearer '+SB.key,'Content-Type':'application/json'}:{apikey:SB.key,'Content-Type':'application/json'},body:JSON.stringify(args)}).then(function(r){
     return r.text().then(function(t){var j=null;try{j=t?JSON.parse(t):null}catch(e){}if(!r.ok){throw new Error((j&&(j.message||j.msg))||('Error '+r.status))}return j})});
 }
 function sbBase(v){try{if(v===undefined)return +(localStorage.getItem('bitacora-venta-sb-base')||0);localStorage.setItem('bitacora-venta-sb-base',String(v))}catch(e){return 0}}
