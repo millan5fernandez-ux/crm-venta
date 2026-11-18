@@ -965,17 +965,34 @@ var PLATO_SEED=[];
 try{if(PLATO_SEED.length&&!localStorage.getItem(LS+'-seedp')){PLATO_SEED.forEach(function(p){if(!S.platos.some(function(x){return x.id===p.id}))S.platos.push(p)});localStorage.setItem(LS+'-seedp','1')}}catch(e){}
 /* Para activar cuentas y sincronización: pon aquí la URL y la clave pública de tu proyecto Supabase. Vacío = solo datos locales. */
 var SB={url:'',key:'',ls:'bitacora-venta-sb'};
-var sbS=null,sbNote='';
-function jwt(t){try{return JSON.parse(decodeURIComponent(escape(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))))}catch(e){return {}}}
+var sbS=null,sbNote='',sbArm=0;
 function sbStore(o){sbS=o;try{if(o)localStorage.setItem(SB.ls,JSON.stringify(o));else localStorage.removeItem(SB.ls)}catch(e){}}
-function sbFromTokens(a,r){var p=jwt(a);sbStore({access_token:a,refresh_token:r,exp:(p.exp||0)*1000,uid:p.sub,email:p.email||''})}
-try{var _r=localStorage.getItem(SB.ls);if(_r)sbS=JSON.parse(_r)}catch(e){}
-(function(){var h=(location.hash||'').slice(1);if(h.indexOf('access_token=')<0&&h.indexOf('error_description=')<0)return;
-  var q=new URLSearchParams(h);
-  if(q.get('access_token')&&q.get('refresh_token'))sbFromTokens(q.get('access_token'),q.get('refresh_token'));
-  else if(q.get('error_description'))sbNote='No se pudo confirmar el correo: '+q.get('error_description');
-  try{history.replaceState(null,'',location.pathname+location.search+'#escritorio')}catch(e){}
-})();
+try{var _r=localStorage.getItem(SB.ls);if(_r){var _o=JSON.parse(_r);if(_o&&_o.id&&_o.k)sbS=_o}}catch(e){}
+/* --- Sincronización cifrada: el contenido se cifra en el dispositivo con una clave derivada de la clave de compra; el servidor solo guarda datos ilegibles --- */
+function b64(u){var s='';for(var i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s)}
+function unb64(t){var b=atob(t),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
+function vOk(){return !!(window.crypto&&crypto.subtle&&window.TextEncoder)}
+function vKeys(key){
+  var en=new TextEncoder();
+  return crypto.subtle.importKey('raw',en.encode(key),'PBKDF2',false,['deriveBits']).then(function(m){
+    return crypto.subtle.deriveBits({name:'PBKDF2',salt:en.encode('zancal-sync-v1'),iterations:200000,hash:'SHA-256'},m,256)}).then(function(bits){
+    return {id:sha256hex('zancal-id:'+key),k:b64(new Uint8Array(bits))}});
+}
+function vKey(){return crypto.subtle.importKey('raw',unb64(sbS.k),{name:'AES-GCM'},false,['encrypt','decrypt'])}
+function vPipe(u,Cls){return new Response(new Blob([u]).stream().pipeThrough(new Cls('gzip'))).arrayBuffer().then(function(a){return new Uint8Array(a)})}
+function vEnc(o){
+  var u=new TextEncoder().encode(JSON.stringify(o)),gz=typeof CompressionStream==='function'&&typeof Response==='function';
+  return (gz?vPipe(u,CompressionStream):Promise.resolve(u)).then(function(d){
+    var p=new Uint8Array(d.length+1);p[0]=gz?1:0;p.set(d,1);var iv=crypto.getRandomValues(new Uint8Array(12));
+    return vKey().then(function(k){return crypto.subtle.encrypt({name:'AES-GCM',iv:iv},k,p)}).then(function(c){
+      var c8=new Uint8Array(c),all=new Uint8Array(12+c8.length);all.set(iv,0);all.set(c8,12);return 'z1.'+b64(all)})});
+}
+function vDec(t){
+  if(!t||t.slice(0,3)!=='z1.')return Promise.reject(new Error('Formato desconocido'));
+  var all=unb64(t.slice(3));
+  return vKey().then(function(k){return crypto.subtle.decrypt({name:'AES-GCM',iv:all.slice(0,12)},k,all.slice(12))}).then(function(p){
+    var u=new Uint8Array(p),d=u.slice(1);return u[0]===1?vPipe(d,DecompressionStream):Promise.resolve(d)}).then(function(d){return JSON.parse(new TextDecoder().decode(d))});
+}
 var MODS=[['gastos','Gastos'],['gym','Gym'],['comida','Comida'],['cuerpo','Personal'],['metas','Calendario']];
 function dayOn(){return !(S.profile&&S.profile.dayflow===0)}
 function modOn(k){var m=S.profile&&S.profile.mods;return !m||m[k]!==0}
@@ -992,10 +1009,11 @@ var lastAuto='';
 var nSaves=0;
 function commit(){nSaves++;var td=today();if(lastAuto!==td){lastAuto=td;snap('automática')}S.rev=Date.now();try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}clearTimeout(timer);dirty=true;timer=setTimeout(flush,700);render()}
 function flush(){
-  if(!dbDoc)return;
+  if(!dbDoc){dirty=false;return}
+  if(sbS&&!sbReady)return;
   if(saving){dirty=true;return}
   saving=true;dirty=false;
-  dbDoc.set(JSON.parse(JSON.stringify(S))).then(function(){setSync('Guardado en tu cuenta')},function(){setSync('No se pudo guardar en tu cuenta; los datos siguen en este dispositivo')}).then(function(){saving=false;if(dirty)flush()});
+  dbDoc.set(JSON.parse(JSON.stringify(S))).then(function(){setSync('Guardado y cifrado en la nube')},function(){setSync('No se pudo guardar en la nube; los datos siguen en este dispositivo')}).then(function(){saving=false;if(dirty)flush()});
 }
 var SNAPK='bitacora-venta-snaps';
 function cnt(d){return SYNC_LISTS.reduce(function(a,k){return a+((d&&d[k])?d[k].length:0)},0)}
@@ -1009,17 +1027,12 @@ function snap(why){
 }
 var SYNC_LISTS=['gastos','ingresos','gym','comida','cuerpo','plans','gymdays','routines','ingr','platos'];
 function sbSay(t){sbNote=t;var e=$('#sbmsg');if(e)e.textContent=t;var a=$('#acmsg');if(a)a.textContent=t}
-function sbReq(path,o,retry){
-  o=o||{};var h=Object.assign({apikey:SB.key,'Content-Type':'application/json'},o.headers||{});
-  h.Authorization='Bearer '+((sbS&&sbS.access_token)||SB.key);
-  return fetch(SB.url+path,{method:o.method||'GET',headers:h,body:o.body}).then(function(r){
-    if(r.status===401&&sbS&&sbS.refresh_token&&!retry)return sbRefresh().then(function(){return sbReq(path,o,true)});
-    return r.text().then(function(t){var j=null;try{j=t?JSON.parse(t):null}catch(e){}if(!r.ok){var m=(j&&(j.msg||j.error_description||j.message))||('Error '+r.status);throw new Error(m)}return j})});
+function sbReq(fn,args){
+  return fetch(SB.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SB.key,Authorization:'Bearer '+SB.key,'Content-Type':'application/json'},body:JSON.stringify(args)}).then(function(r){
+    return r.text().then(function(t){var j=null;try{j=t?JSON.parse(t):null}catch(e){}if(!r.ok){throw new Error((j&&(j.message||j.msg))||('Error '+r.status))}return j})});
 }
-function sbRefresh(){
-  return fetch(SB.url+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:SB.key,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:sbS.refresh_token})}).then(function(r){
-    return r.json().then(function(j){if(!r.ok||!j.access_token){sbStore(null);throw new Error('La sesión ha caducado. Vuelve a entrar.')}sbFromTokens(j.access_token,j.refresh_token)})});
-}
+function sbBase(v){try{if(v===undefined)return +(localStorage.getItem('bitacora-venta-sb-base')||0);localStorage.setItem('bitacora-venta-sb-base',String(v))}catch(e){return 0}}
+function sbLink(){try{localStorage.setItem('bitacora-venta-sb-linked',sbS.id)}catch(e){}}
 function sbMerge(a,b){
   var base=(a.rev||0)>=(b.rev||0)?a:b,oth=base===a?b:a,out=JSON.parse(JSON.stringify(base));
   SYNC_LISTS.forEach(function(k){
@@ -1036,24 +1049,37 @@ function sbMerge(a,b){
   out.example=false;return out;
 }
 function sbApply(d){snap('antes de sincronizar');adopt(d);try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}render()}
+var sbReady=false;
 function sbPull(first){
-  if(!sbS||saving||dirty)return Promise.resolve();
-  return sbReq('/rest/v1/crm_state?select=data,updated_at&user_id=eq.'+sbS.uid).then(function(rows){
-    var d=rows&&rows[0]&&rows[0].data,linked='';try{linked=localStorage.getItem('bitacora-venta-sb-linked')||''}catch(e){}
-    if(d&&d.v===1){
-      if(cnt(S)===0&&cnt(d)>0){sbApply(d);setSync('Sincronizado');sbSay('Datos recuperados de tu cuenta')}
-      else if(cnt(d)===0&&cnt(S)>0){S.rev=Date.now();try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}flush();setSync('Sincronizado')}
-      else if(first&&linked!==sbS.uid&&!isEmpty()&&d.rev!==S.rev){var m=sbMerge(S,d);m.rev=Date.now();sbApply(m);flush();sbSay('Datos unidos y guardados en tu cuenta')}
-      else if((d.rev||0)>(S.rev||0)){sbApply(d);setSync('Sincronizado');sbSay('Sincronizado con tu cuenta')}
-      else if((d.rev||0)<(S.rev||0)){flush()}
-      else setSync('Sincronizado');
-    }else{if(!isEmpty()||S.rev)flush();else setSync('Sincronizado')}
-    try{localStorage.setItem('bitacora-venta-sb-linked',sbS.uid)}catch(e){}
-  }).catch(function(e){setSync('Sin conexión con tu cuenta; los datos siguen en este dispositivo');sbSay(e.message||'Sin conexión')});
+  if(!sbS)return Promise.resolve();
+  if(!sbReady)first=true;
+  if(!first&&(saving||dirty))return Promise.resolve();
+  return sbReq('vault_get',{p_id:sbS.id,p_have:S.rev||0}).then(function(rows){
+    var row=rows&&rows[0],linked='';try{linked=localStorage.getItem('bitacora-venta-sb-linked')||''}catch(e){}
+    if(!row){sbReady=true;if(!isEmpty()||S.rev)flush();else setSync('Sincronizado');sbLink();return}
+    if(row.blob===null){sbReady=true;setSync('Sincronizado');sbLink();if(dirty)flush();return}
+    return vDec(row.blob).then(function(d){
+      sbReady=true;
+      if(d&&d.v===1){
+        var r=d.rev||0,l=S.rev||0,b=sbBase();
+        function merged(txt){var m=sbMerge(S,d);m.rev=Math.max(Date.now(),r+1);sbBase(r);sbApply(m);flush();sbSay(txt)}
+        if(cnt(S)===0&&cnt(d)>0){sbApply(d);sbBase(r);setSync('Sincronizado');sbSay('Datos recuperados de la nube')}
+        else if(cnt(d)===0&&cnt(S)>0){sbBase(r);S.rev=Math.max(Date.now(),r+1);try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}flush();setSync('Sincronizado')}
+        else if(first&&linked!==sbS.id&&!isEmpty()&&r!==l){merged('Datos de los dos dispositivos unidos y guardados')}
+        else if(r===l){sbBase(r);setSync('Sincronizado')}
+        else if(r>b&&l>b){merged('Cambios de los dos dispositivos unidos')}
+        else if(r>b){sbApply(d);sbBase(r);setSync('Sincronizado');sbSay('Sincronizado')}
+        else if(l>b){sbBase(r);flush()}
+        else{sbBase(r);setSync('Sincronizado')}
+      }
+      sbLink();
+    },function(){throw new Error('No se pudieron descifrar los datos de la nube. ¿Usaste otra clave?')});
+  }).catch(function(e){setSync('Sin conexión con la nube; los datos siguen en este dispositivo');sbSay(e.message||'Sin conexión')});
 }
 function sbStart(){
-  dbDoc={set:function(o){return sbReq('/rest/v1/crm_state?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({user_id:sbS.uid,data:o,updated_at:new Date().toISOString()})}).then(function(){try{localStorage.setItem('bitacora-venta-sb-linked',sbS.uid)}catch(e){}})}};
-  setSync('Conectando con tu cuenta…');
+  sbReady=false;
+  dbDoc={set:function(o){return vEnc(o).then(function(b){return sbReq('vault_put',{p_id:sbS.id,p_blob:b,p_rev:o.rev||0,p_prev:sbBase()})}).then(function(ok){if(ok===false){setSync('Otro dispositivo guardó cambios; uniendo…');setTimeout(function(){sbPull(true)},400);return}sbBase(o.rev||0);sbLink()})}};
+  setSync('Conectando con la nube…');
   sbPull(true).then(function(){render()});
   if(!sbStart.on){sbStart.on=1;
     document.addEventListener('visibilitychange',function(){if(!document.hidden&&sbS)sbPull()});
@@ -1061,21 +1087,18 @@ function sbStart(){
     setInterval(function(){if(sbS&&!document.hidden)sbPull()},60000);
   }
 }
-function sbAuth(kind){
-  var em=($('#ac-email')||{}).value||($('#sb-email')||{}).value||'',pw=($('#ac-pass')||{}).value||($('#sb-pass')||{}).value||'';
-  em=em.trim();if(!em||pw.length<6){sbSay('Escribe tu email y una contraseña de al menos 6 caracteres.');return}
-  sbSay(kind==='up'?'Creando cuenta…':'Entrando…');
-  var url=kind==='up'?'/auth/v1/signup?redirect_to='+encodeURIComponent(location.origin+location.pathname):'/auth/v1/token?grant_type=password';
-  return fetch(SB.url+url,{method:'POST',headers:{apikey:SB.key,'Content-Type':'application/json'},body:JSON.stringify({email:em,password:pw})}).then(function(r){
-    return r.json().then(function(j){
-      if(!r.ok){var m=j.msg||j.error_description||j.message||'Error';
-        if(/invalid login/i.test(m))m='Email o contraseña incorrectos, o aún no has confirmado el correo.';
-        else if(/already|registered/i.test(m))m='Ese email ya tiene cuenta. Pulsa "Entrar".';
-        else if(/rate limit|security purposes/i.test(m))m='Demasiados intentos. Espera un minuto y vuelve a probar.';
-        throw new Error(m)}
-      if(j.access_token){sbFromTokens(j.access_token,j.refresh_token);sbSay('');sbStart();render()}
-      else sbSay('Te hemos enviado un correo. Ábrelo y pulsa el enlace para confirmar; después vuelve aquí y pulsa "Entrar".');
-    })}).catch(function(e){sbSay(e.message||'No se pudo conectar')});
+function sbEnable(){
+  var inp=[$('#sb-key'),$('#ac-key')].filter(function(x){return x&&x.value})[0]||$('#ac-key')||$('#sb-key'),v=licNorm(inp&&inp.value);
+  if(!vOk()){sbSay('Tu navegador no permite el cifrado necesario. Usa un navegador actual y la dirección https.');return}
+  if(v.length!==16||!licHas(sha256hex(v).slice(0,16))){sbSay('Clave no válida. Es la de tu email de compra (16 caracteres).');return}
+  sbSay('Activando…');
+  vKeys(v).then(function(o){sbStore({id:o.id,k:o.k,t:Date.now()});sbSay('');sbStart();render()}).catch(function(){sbSay('No se pudo activar la sincronización')});
+}
+function sbOff(){sbStore(null);try{localStorage.removeItem('bitacora-venta-sb-base')}catch(e){}dbDoc=null;sbArm=0;try{localStorage.removeItem('bitacora-venta-sb-linked')}catch(e){}sbNote='';setSync('Datos guardados solo en este dispositivo');render()}
+function sbDel(){
+  if(!sbArm){sbArm=1;acKey='';render();return}
+  sbSay('Borrando…');var id=sbS&&sbS.id;
+  sbReq('vault_del',{p_id:id}).then(function(){sbOff();sbSay('Datos de la nube borrados. Siguen en este dispositivo.');acKey=''}).catch(function(e){sbArm=0;sbSay(e.message||'No se pudo borrar')});
 }
 function snapCard(){
   var a=snaps();if(!a.length)return '';
@@ -1085,13 +1108,13 @@ function snapCard(){
 function sbCard(){
   if(!SB.url)return '';
   if(window.claude&&claude.use)return '';
-  var h='<div class="card"><h3>Cuenta y sincronización</h3>';
+  var h='<div class="card"><h3>Sincronizar entre dispositivos</h3>';
   if(sbS){
-    h+='<p style="margin:0 0 10px;color:var(--ink2)">Conectado como <b>'+esc(sbS.email||'tu cuenta')+'</b>. Tus datos se guardan en tu cuenta y se sincronizan entre tus dispositivos.</p><div class="fa" style="margin-top:0"><button class="btn" data-act="sbsync" type="button">Sincronizar ahora</button><button class="btn" data-act="sbout" type="button">Salir</button></div>';
+    h+='<p style="margin:0 0 10px;color:var(--ink2)">Sincronización activa. Tus datos se cifran en tu dispositivo antes de subirse; nadie, ni el titular de Zancal, puede leerlos. En el otro dispositivo, pon la misma clave.</p><div class="fa" style="margin-top:0"><button class="btn" data-act="sbsync" type="button">Sincronizar ahora</button><button class="btn" data-act="sbout" type="button">Desactivar</button><button class="btn" data-act="sbdel" type="button">'+(sbArm?'¿Seguro? Pulsa otra vez':'Borrar datos de la nube')+'</button></div>';
   }else{
-    h+='<p style="margin:0 0 10px;color:var(--ink2)">Entra con tu email para ver los mismos datos en el móvil y en el ordenador. Si es la primera vez, pulsa "Crear cuenta" y confirma el correo.</p>'+
-      '<div class="fg"><label class="f" for="sb-email"><span>Email</span><input id="sb-email" type="email" autocomplete="email" inputmode="email"></label><label class="f" for="sb-pass"><span>Contraseña</span><input id="sb-pass" type="password" autocomplete="current-password" minlength="6"></label></div>'+
-      '<div class="fa"><button class="btn primary" data-act="sbin" type="button">Entrar</button><button class="btn" data-act="sbup" type="button">Crear cuenta</button></div>';
+    h+='<p style="margin:0 0 10px;color:var(--ink2)">Ten los mismos datos en el móvil y en el ordenador. Escribe la clave de tu email de compra. Tus datos se cifran en tu dispositivo antes de subirse; si pierdes la clave, no se pueden recuperar.</p>'+
+      '<div class="fg"><label class="f" for="sb-key"><span>Clave de compra</span><input id="sb-key" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="19" placeholder="XXXX-XXXX-XXXX-XXXX"></label></div>'+
+      '<div class="fa"><button class="btn primary" data-act="sbin" type="button">Activar sincronización</button></div>';
   }
   return h+'<p class="ts" id="sbmsg" role="status">'+esc(sbNote)+'</p></div>';
 }
@@ -1102,11 +1125,12 @@ e.innerHTML=p(h)+'<i>:</i>'+p(d.getMinutes());document.getElementById('cs').text
 document.getElementById('cgreet').textContent='// '+(h<6?'Buenas noches':h<14?'Buenos días':h<21?'Buenas tardes':'Buenas noches')+(S&&S.profile&&S.profile.name?', '+S.profile.name:'');
 document.getElementById('cdate').textContent=D[d.getDay()]+' '+d.getDate()+' '+M[d.getMonth()]}
 tick();setInterval(function(){if(!document.hidden)tick()},1000)})();
-document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target&&e.target.closest&&e.target.closest('#acct')){e.preventDefault();sbAuth('in')}});
+document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target&&(e.target.id==='ac-key'||e.target.id==='sb-key')){e.preventDefault();sbEnable()}});
+document.addEventListener('input',function(e){var t=e.target;if(t&&(t.id==='ac-key'||t.id==='sb-key')){t.value=licNorm(t.value).replace(/(.{4})(?=.)/g,'$1-');sbNote='';var m=$('#acmsg')||$('#sbmsg');if(m)m.textContent=''}});
 document.body.classList.add('intro');setTimeout(function(){document.body.classList.remove('intro')},4600);
 function initDb(){
   if(!window.claude||!claude.use){
-    if(sbS&&sbS.refresh_token){sbStart();return}
+    if(sbS&&sbS.id&&SB.url){sbStart();return}
     setSync('Datos guardados solo en este dispositivo');return}
   Promise.all([claude.use('user'),claude.use('db')]).then(function(r){
     var user=r[0],db=r[1];
@@ -1852,7 +1876,7 @@ function installHtml(){
     desk:['En tu móvil, abre <b>app.zancal.com</b> e introduce tu clave.','<b>iPhone:</b> Safari → Compartir → «Añadir a pantalla de inicio».','<b>Android:</b> Chrome → menú ⋮ → «Instalar app».']}[p];
   var h='<ol class="inst">'+st.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ol>';
   if(instEv&&p!=='ios')h+='<div class="fa" style="margin:0 0 10px"><button class="btn primary" type="button" data-act="install">Instalar ahora</button></div>';
-  return h+'<p class="ts" style="margin:0">En cada dispositivo pones la clave una vez. Los datos no se pasan solos: exporta una copia en Ajustes y restáurala en el otro.</p>';
+  return h+'<p class="ts" style="margin:0">En cada dispositivo pones la clave una vez. '+(SB.url?'Para ver tus datos en el otro dispositivo, activa «Sincronizar entre dispositivos» en Ajustes con tu clave.':'Los datos no se pasan solos: exporta una copia en Ajustes y restáurala en el otro.')+'</p>';
 }
 function installCard(){return isStandalone()?'':'<div class="card"><h3>Instalar en el móvil</h3>'+installHtml()+'</div>'}
 function introSlides(){
@@ -2006,9 +2030,9 @@ document.addEventListener('click',function(e){
   else if(a==='day'){var n=Number(b.dataset.d);ui.day=n?addDays(ui.day||today(),n):'';ui.del='';render()}
   else if(a==='cat'){ui.cat=b.dataset.v;$('#chips').innerHTML=chips();refreshList()}
   else if(a==='snaprest'){var sn=snaps()[+b.dataset.i];if(sn&&sn.data){snap('antes de restaurar');adopt(sn.data);ui.impmsg='';commit()}}
-  else if(a==='sbin'){sbAuth('in')}
-  else if(a==='sbup'){sbAuth('up')}
-  else if(a==='sbout'){sbStore(null);dbDoc=null;try{localStorage.removeItem('bitacora-venta-sb-linked')}catch(e){}sbNote='';setSync('Datos guardados solo en este dispositivo');render()}
+  else if(a==='sbin'){sbEnable()}
+  else if(a==='sbout'){sbOff()}
+  else if(a==='sbdel'){sbDel()}
   else if(a==='dstep'){dayStep(+b.dataset.i)}
   else if(a==='dstart'){tourStart()}
   else if(a==='tournext'){tourMove(1)}
@@ -2206,13 +2230,13 @@ function acctRender(){
   var el=$('#acct');if(!el)return;
   if(window.claude&&claude.use){el.style.display='none';return}
   if(!SB.url){el.style.display='none';return}
-  var key=sbS?'in:'+(sbS.email||''):'out';
+  var key=sbS?'on:'+sbArm:'off';
   if(key===acKey)return;acKey=key;
-  var h='<h3>Cuenta y sincronización</h3>';
+  var h='<h3>Sincronizar entre dispositivos</h3>';
   if(sbS){
-    h+='<div class="acrow"><p class="acinfo">Conectado como <b>'+esc(sbS.email||'tu cuenta')+'</b></p><div class="acbtns"><button class="btn primary" data-act="sbsync" type="button">Sincronizar ahora</button><button class="btn" data-act="sbout" type="button">Salir</button></div></div>';
+    h+='<div class="acrow"><p class="acinfo">Sincronización activa y cifrada. En el otro dispositivo, usa la misma clave.</p><div class="acbtns"><button class="btn primary" data-act="sbsync" type="button">Sincronizar ahora</button><button class="btn" data-act="sbout" type="button">Desactivar</button></div></div>';
   }else{
-    h+='<div class="acrow"><label class="f" for="ac-email"><span>Email</span><input id="ac-email" type="email" autocomplete="email" inputmode="email"></label><label class="f" for="ac-pass"><span>Contraseña</span><input id="ac-pass" type="password" autocomplete="current-password" minlength="6"></label><div class="acbtns"><button class="btn primary" data-act="sbin" type="button">Entrar</button><button class="btn" data-act="sbup" type="button">Crear cuenta</button></div></div>';
+    h+='<div class="acrow"><label class="f" for="ac-key"><span>Clave de compra</span><input id="ac-key" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="19" placeholder="XXXX-XXXX-XXXX-XXXX"></label><div class="acbtns"><button class="btn primary" data-act="sbin" type="button">Activar</button></div></div>';
   }
   el.innerHTML=h+'<p class="ts" id="acmsg" role="status">'+esc(sbNote)+'</p>';
 }
