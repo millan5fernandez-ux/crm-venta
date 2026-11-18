@@ -28,3 +28,6 @@ Abre `index.html` desde un servidor estático (por ejemplo `python3 -m http.serv
 
 ## Acceso por clave
 Cada pedido de Shopify genera una clave (HMAC del nº de pedido con un secreto que solo está en la plantilla privada del email). La app guarda solo las huellas de las claves válidas (`LIC_H`) y las comprueba en el dispositivo. El secreto NO está en este repo.
+
+## Sin dependencias externas
+La app de producción (`index.html`) no carga nada de terceros: `three.js`, `gsap` y las tipografías están en `vendor/`. La versión de prueba (Artifact) sí usa CDN porque su entorno lo exige.
