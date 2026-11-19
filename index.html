@@ -849,6 +849,8 @@ body.drawer-open #dayflow{display:none}
 #lic .ls{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font:13px/1.45 var(--font-body);color:var(--ink2);cursor:pointer}#lic .ls input{width:18px;height:18px;margin:1px 0 0;flex:none;padding:0;accent-color:var(--accent)}#lic .lm{min-height:20px;margin:10px 0 0;font:600 13px var(--font-body);color:var(--bad)}
 #lic .lf{border-top:2px solid var(--edge);background:var(--soft);padding:12px 20px;font:12px/1.7 var(--font-mono);color:var(--muted)}
 #lic .lf a{color:var(--ink)}
+.qrw{display:flex;gap:14px;align-items:center;margin:0 0 14px;flex-wrap:wrap}.qrb{width:132px;height:132px;background:#fff;padding:8px;border:2px solid var(--edge);flex:none}.qrb svg{display:block;width:100%;height:100%}.qrt{flex:1;min-width:180px;font-size:13px;line-height:1.5;color:var(--ink2)}.qrk{font:700 15px var(--font-mono);letter-spacing:.08em;color:var(--ink);margin:8px 0;user-select:all}
+
 
 /* ======== Instalar en el móvil ======== */
 .inst{margin:0 0 12px;padding-left:22px;display:grid;gap:6px;font-size:14px;line-height:1.45;color:var(--ink2)}
@@ -910,6 +912,7 @@ body.drawer-open #dayflow{display:none}
 <div id="tip" hidden></div>
 <script src="vendor/three.min.js"></script>
 <script src="vendor/gsap.min.js"></script>
+<script src="vendor/qr.js"></script>
 <script>
 (function(){
 'use strict';
@@ -1870,12 +1873,19 @@ var instEv=null;
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();instEv=e});
 function isStandalone(){try{return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true}catch(e){return false}}
 function platform(){var u=navigator.userAgent||'';if(/iPhone|iPad|iPod/.test(u)||(/Macintosh/.test(u)&&navigator.maxTouchPoints>1))return 'ios';if(/Android/.test(u))return 'android';return 'desk'}
+function rawKey(){try{return licNorm(localStorage.getItem('bitacora-venta-key')||'')}catch(e){return ''}}
+function dashKey(k){return k.replace(/(.{4})(?=.)/g,'$1-')}
+function qrBox(){
+  var k=rawKey();if(k.length!==16||!window.qrcode)return '';
+  try{var q=qrcode(0,'M');q.addData(location.origin+location.pathname+'#k='+k);q.make();
+    return '<div class="qrw"><div class="qrb" role="img" aria-label="Código QR que abre Zancal en tu móvil con tu clave">'+q.createSvgTag({cellSize:4,margin:0,scalable:true})+'</div><div class="qrt"><b>Escanéalo con la cámara del móvil.</b> Se abre Zancal con tu clave ya escrita: solo pulsa «Activar».<div class="qrk">'+dashKey(k)+'</div><button class="btn" type="button" data-act="copykey">Copiar clave</button></div></div>'}catch(e){return ''}
+}
 function installHtml(){
   var p=platform(),st={
     ios:['Abre Zancal en <b>Safari</b>.','Pulsa <b>Compartir</b> (el cuadrado con una flecha hacia arriba).','Desliza y elige <b>«Añadir a pantalla de inicio»</b>.','Pulsa <b>«Añadir»</b>. Ya tienes el icono Z en tu móvil.'],
     android:['Abre Zancal en <b>Chrome</b>.','Pulsa el menú <b>⋮</b> (arriba a la derecha).','Elige <b>«Instalar app»</b> o <b>«Añadir a pantalla de inicio»</b>.','Confirma. El icono Z aparecerá en tu pantalla.'],
     desk:['En tu móvil, abre <b>app.zancal.com</b> e introduce tu clave.','<b>iPhone:</b> Safari → Compartir → «Añadir a pantalla de inicio».','<b>Android:</b> Chrome → menú ⋮ → «Instalar app».']}[p];
-  var h='<ol class="inst">'+st.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ol>';
+  var h=(p==='desk'?qrBox():'')+'<ol class="inst">'+st.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ol>';
   if(instEv&&p!=='ios')h+='<div class="fa" style="margin:0 0 10px"><button class="btn primary" type="button" data-act="install">Instalar ahora</button></div>';
   return h+'<p class="ts" style="margin:0">En cada dispositivo pones la clave una vez. '+(SB.url?'Para ver tus datos en el otro dispositivo, activa «Sincronizar entre dispositivos» en Ajustes con tu clave.':'Los datos no se pasan solos: exporta una copia en Ajustes y restáurala en el otro.')+'</p>';
 }
@@ -2063,6 +2073,7 @@ document.addEventListener('click',function(e){
       snap('antes de importar');o.example=false;adopt(o);ui.impmsg='Importado: '+S.gym.length+' ejercicios, '+S.gymdays.length+' días de gym, '+S.comida.length+' comidas, '+S.gastos.length+' gastos.';commit();
     }catch(err){ui.impmsg='No se pudo importar: el texto no es una copia válida.';render()}
   }
+  else if(a==='copykey'){var ck=dashKey(rawKey());if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(ck).then(function(){b.textContent='Copiada'},function(){b.textContent='Selecciónala y cópiala'});else b.textContent='Selecciónala y cópiala'}
   else if(a==='copy'){
     var txt=JSON.stringify(S);
     var show=function(){ui.backup=txt;render();var ta=$('#bk');if(ta){ta.focus();ta.select()}};
@@ -2829,10 +2840,13 @@ function licInit(){
   if(licHas(st))unlock();else lock();
   var ls=el.querySelector('#lic-sync');if(ls&&SB.url&&vOk())ls.hidden=false;
   var f=el.querySelector('form'),inp=f.querySelector('input'),msg=f.querySelector('.lm');
+  var hm=/[#&]k=([0-9A-Fa-f-]{16,19})/.exec(location.hash||'');
+  if(hm){var kk=licNorm(hm[1]);try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
+    if(kk.length===16&&!licHas(st)){inp.value=kk.replace(/(.{4})(?=.)/g,'$1-');setTimeout(function(){var bt=f.querySelector('.lbtn');if(bt)try{bt.focus()}catch(e){}},120)}}
   inp.addEventListener('input',function(){var v=licNorm(inp.value);inp.value=v.replace(/(.{4})(?=.)/g,'$1-');msg.textContent=''});
   f.addEventListener('submit',function(e){e.preventDefault();
     var v=licNorm(inp.value),h=v.length===16?sha256hex(v).slice(0,16):'';
-    if(licHas(h)){try{localStorage.setItem(LIC_K,h)}catch(x){}
+    if(licHas(h)){try{localStorage.setItem(LIC_K,h);localStorage.setItem('bitacora-venta-key',v)}catch(x){}
       var cb=f.querySelector('input[name=s]');
       if(cb&&cb.checked&&!sbS&&SB.url&&vOk()){msg.style.color='var(--ink2)';msg.textContent='Buscando tus datos en la nube…';var done=0,go=function(){if(done)return;done=1;msg.textContent='';msg.style.color='';unlock()};setTimeout(go,9000);
         vKeys(v).then(function(o){sbStore({id:o.id,k:o.k,t:Date.now()});return sbStart()}).then(go,go)}
