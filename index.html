@@ -1914,6 +1914,8 @@ function introPos(){
 function introRender(){
   var el=document.getElementById('intro');
   if(!(S.profile&&S.profile.onboarded)||S.profile.introDone){if(el)el.remove();return}
+  var sk='';try{sk=localStorage.getItem('bitacora-venta-skiptour')}catch(e){}
+  if(sk){try{localStorage.removeItem('bitacora-venta-skiptour')}catch(e){}S.profile.introDone=true;if(el)el.remove();commit();return}
   var L=introSlides(),i=Math.max(0,Math.min(ui.intro||0,L.length-1)),last=i===L.length-1,st=L[i];
   var first=!el;
   if(first){el=document.createElement('div');el.id='intro';el.setAttribute('role','dialog');el.setAttribute('aria-label','Guía de bienvenida');el.innerHTML='<div class="isp"></div><div class="gc"></div>';document.body.appendChild(el)}
@@ -2841,7 +2843,7 @@ function licInit(){
   var ls=el.querySelector('#lic-sync');if(ls&&SB.url&&vOk())ls.hidden=false;
   var f=el.querySelector('form'),inp=f.querySelector('input'),msg=f.querySelector('.lm');
   var hm=/[#&]k=([0-9A-Fa-f-]{16,19})/.exec(location.hash||'');
-  if(hm){var kk=licNorm(hm[1]);try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
+  if(hm){try{localStorage.setItem('bitacora-venta-skiptour','1')}catch(e){}var kk=licNorm(hm[1]);try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
     if(kk.length===16&&!licHas(st)){inp.value=kk.replace(/(.{4})(?=.)/g,'$1-');msg.style.color='var(--ink2)';msg.textContent='Tu clave ya está escrita. Solo pulsa «Activar».';setTimeout(function(){var bt=f.querySelector('.lbtn');if(bt)try{bt.focus()}catch(e){}},120)}}
   inp.addEventListener('input',function(){var v=licNorm(inp.value);inp.value=v.replace(/(.{4})(?=.)/g,'$1-');msg.style.color='';msg.textContent=''});
   f.addEventListener('submit',function(e){e.preventDefault();
