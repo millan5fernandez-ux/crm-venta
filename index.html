@@ -856,6 +856,12 @@ body.drawer-open #dayflow{display:none}
 .inst{margin:0 0 12px;padding-left:22px;display:grid;gap:6px;font-size:14px;line-height:1.45;color:var(--ink2)}
 .inst b{color:var(--ink)}
 #intro .gc{max-height:calc(100dvh - 48px);overflow:auto}
+
+.gex{grid-column:1/-1;list-style:none;margin:6px 0 0;padding:6px 0 0;border-top:1px dashed var(--line);display:flex;flex-direction:column;gap:2px}
+.gex li{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--ink2);padding:4px 0}
+.d-empty #chart,.d-empty #upnext,.d-empty #feed,.d-empty #week{display:none}
+.qhint{display:none;margin:0 0 10px;font-size:13px;color:#0b0b0b}.d-empty .qhint{display:block}
+@media (hover:none){#side .tab:hover:not([aria-current="page"]){background:transparent;color:var(--ink2)}}
 </style>
 <div id="app">
   <header id="top">
@@ -892,7 +898,7 @@ body.drawer-open #dayflow{display:none}
       <section class="dcard" id="upnext"></section>
       <section class="dcard" id="feed"></section>
       <section class="dcard" id="week"></section>
-      <section class="dcard" id="quickc"><h3>Registrar rápido</h3>
+      <section class="dcard" id="quickc"><h3>Registrar rápido</h3><p class="qhint">Empieza por aquí: los resúmenes y gráficos aparecerán según vayas apuntando.</p>
         <div class="quick">
           <button class="qa" data-go="gastos"><span>＋</span>Gasto</button>
           <button class="qa" data-go="comida"><span>＋</span>Comida</button>
@@ -1313,7 +1319,7 @@ VIEWS.resumen=function(){
     '<div class="card"><h3>Gasto · últimos 14 días</h3>'+gastoCols(t,14)+'</div>'+
     '<div class="card"><h3>Calorías · últimos 7 días</h3>'+kcalCols(t,7)+'</div>'+
     '<div class="card"><h3>Series por músculo · esta semana</h3>'+muscleBars()+'</div>'+
-    '<div class="card"><h3>Equilibrio muscular · semana actual vs anterior</h3>'+radarChart()+'</div>'+
+    '<div class="card"><h3>Reparto por músculo · esta semana y la anterior</h3>'+radarChart()+'</div>'+
     '<div class="card"><h3>Peso · 60 días</h3>'+weightLine(60,'rw')+'</div>'+
   '</div>'+
   '<div class="card"><h3>Último movimiento</h3><ul class="rows">'+feed.map(function(f){return '<li class="row"><span class="rd">'+fshort(f.date)+'</span><span><span class="rt">'+esc(f.t)+'</span><span class="rs">'+f.k+'</span></span><span class="rv">'+esc(f.v)+'</span></li>'}).join('')+'</ul></div>';
@@ -1546,12 +1552,12 @@ VIEWS.gym=function(){
   (ui.gstats!==false?'<div class="gpbody">'+
   '<div class="tiles">'+
     tile('Sesiones',String(went),'/ 7 días','','Días que has ido')+
-    tile('Series',num(sets),'','','Sin calentamiento · solo músculo principal')+
-    tile('Músculos en meta',hit+' / '+MAIN.length,'',meter(hit,MAIN.length,'var(--s3)'),'Series mínimas por músculo')+
-    tile('Volumen',num(vol),'kg','','Series × reps × kg')+
+    tile('Series',num(sets),'','','Series de trabajo, sin contar calentamiento')+
+    tile('Objetivos cumplidos',hit+' / '+MAIN.length,'',meter(hit,MAIN.length,'var(--s3)'),'Músculos que ya llegan a su mínimo semanal')+
+    tile('Kilos movidos',num(vol),'kg','','Series × repeticiones × peso')+
   '</div>'+
   '<div class="ggrid">'+
-  '<div class="card"><h3>Equilibrio muscular · semana actual vs anterior</h3><div id="radarbox">'+radarChart(true)+'</div></div>'+
+  '<div class="card"><h3>Reparto por músculo · esta semana y la anterior</h3><div id="radarbox">'+(S.gym.length?radarChart(true):'<p class="empty">Aparecerá cuando anotes ejercicios.</p>')+'</div></div>'+
   '<div class="card"><h3>Series por músculo · meta semanal</h3>'+rows+'</div>'+
   '</div>'+
   '<div class="card"><div class="bar"><h3 style="margin:0">Progreso</h3>'+(exs.length?'<select id="exsel" aria-label="Ejercicio" style="max-width:220px">'+exs.map(function(x){return '<option'+(x===ex?' selected':'')+'>'+esc(x)+'</option>'}).join('')+'</select>':'')+'</div>'+
@@ -1573,7 +1579,8 @@ LISTS.gym=function(){
   return '<ul class="rows">'+ds.map(function(d){
     var inf=dayInfo(d),n=sum(S.gym.filter(function(g){return g.date===d}),wsets);
     var conf=ui.del==='gymday:'+d;
-    return '<li class="row"><span class="rd">'+esc(fshort(d))+'</span><span><span class="rt">'+(inf.went?(inf.tags.length?esc(inf.tags.join(' + ')):'Sesión'):'No fui')+'</span><span class="rs">'+(inf.went&&gymSummary(d)?'<span>'+gymSummary(d)+'</span>':'')+'<span class="ra"><button class="ic'+(conf?' danger':'')+'" data-act="gdel" data-d="'+d+'">'+(conf?'Confirmar borrado':'Borrar')+'</button></span></span></span><span class="rv">'+(inf.went?n+' series':'')+'</span></li>';
+    return '<li class="row"><span class="rd">'+esc(fshort(d))+'</span><span><span class="rt">'+(inf.went?(inf.tags.length?esc(inf.tags.join(' + ')):'Sesión'):'No fui')+'</span><span class="rs"><span class="ra"><button class="ic'+(conf?' danger':'')+'" data-act="gdel" data-d="'+d+'">'+(conf?'Confirmar borrado':'Borrar día')+'</button></span></span></span><span class="rv">'+(inf.went?n+' series':'')+'</span>'+
+      (inf.went?'<ul class="gex">'+S.gym.filter(function(g){return g.date===d}).map(function(g){return '<li><span>'+esc(g.exercise)+' · '+esc(g.muscle)+' · '+esc(grows(g))+'</span>'+acts('gym',g.id)+'</li>'}).join('')+'</ul>':'')+'</li>';
   }).join('')+'</ul>';
 };
 
@@ -1809,7 +1816,7 @@ var STEPS=[
  {m:0,label:'Peso y sueño',tab:'cuerpo',form:'cuerpo',tip:'Pésate en ayunas y apunta cuántas horas has dormido.',done:function(){var r=dayRec();return r.weight!=null||r.sleep!=null}},
  {m:0,label:'Desayuno',tab:'comida',form:'comida',meal:'Desayuno',tip:'Apunta qué has desayunado y sus calorías.',done:function(){return mealDone('Desayuno')}},
  {m:1,label:'Comida',tab:'comida',form:'comida',meal:'Comida',tip:'Apunta la comida (y la merienda, si la hay).',done:function(){return mealDone('Comida')}},
- {m:1,label:'Gym',tab:'gym',form:'',tip:'Importa el CSV de tu app de gym de hoy.',done:function(){var t=today();return S.gym.some(function(g){return g.date===t})||S.gymdays.some(function(g){return g.date===t})}},
+ {m:1,label:'Gym',tab:'gym',form:'',tip:'Anota tu entreno de hoy.',done:function(){var t=today();return S.gym.some(function(g){return g.date===t})||S.gymdays.some(function(g){return g.date===t})}},
  {m:1,label:'Gastos',tab:'gastos',form:'gastos',tip:'Apunta lo que has gastado hoy. Si no has gastado nada, pulsa Saltar.',done:function(){var t=today();return S.gastos.some(function(g){return g.date===t})}},
  {m:2,label:'Cena',tab:'comida',form:'comida',meal:'Cena',tip:'Apunta la cena y sus calorías.',done:function(){return mealDone('Cena')}},
  {m:2,label:'Agua, ánimo y nota',tab:'cuerpo',form:'cuerpon',tip:'Cierra el día: agua bebida, cómo te has sentido y una nota.',done:function(){var r=dayRec();return r.mood!=null||r.water!=null}}
@@ -1893,7 +1900,7 @@ function installCard(){return isStandalone()?'':'<div class="card"><h3>Instalar 
 function introSlides(){
   var L=[{tab:'escritorio',ill:'esc',t:'Tu escritorio',p:'Aquí empieza todo: el resumen de tu semana y el escritorio 3D. Pulsa una tarjeta o una zona del escenario para abrir ese módulo.'}];
   if(modOn('gastos'))L.push({tab:'gastos',ill:'gastos',t:'Gastos',p:'Apunta lo que gastas y lo que ingresas, mira a dónde se va el dinero por categorías e importa el CSV de tu banco.'});
-  if(modOn('gym'))L.push({tab:'gym',ill:'gym',t:'Gym',p:'Registra tus entrenos y sigue las series por músculo cada semana. Importa tu CSV de Hevy, Strong, Fitbod, FitNotes u otra app.'});
+  if(modOn('gym'))L.push({tab:'gym',ill:'gym',t:'Gym',p:'Anota tus ejercicios y sigue las series por músculo cada semana. También puedes importar el CSV de Hevy, Strong, Fitbod, FitNotes u otra app.'});
   if(modOn('comida'))L.push({tab:'comida',ill:'comida',t:'Comida',p:'Cuenta calorías y macros, guarda tus platos habituales y vuelve a añadirlos con un toque. El anillo se llena hacia tu objetivo.'});
   if(modOn('cuerpo'))L.push({tab:'cuerpo',ill:'cuerpo',t:'Personal',p:'Peso, sueño, agua y medidas. Verás la evolución y la media mensual, no solo el último dato.'});
   if(modOn('metas'))L.push({tab:'metas',ill:'metas',t:'Calendario',p:'Tus metas y tu constancia día a día: marca lo cumplido y mira la racha del mes.'});
@@ -1956,6 +1963,8 @@ function render(){
   var v=VIEWS[ui.tab];
   $('#view').innerHTML=v?tourBar()+banner()+v():'';
   var dt=$('#dtitle');if(dt)dt.textContent=TITLES[ui.tab]||'';
+  var vh=$('#view h2');if(vh&&dt&&vh.textContent.trim().toLowerCase()===dt.textContent.trim().toLowerCase()){var vb=vh.parentNode;vh.remove();if(vb.classList.contains('bar')&&!vb.children.length)vb.remove()}
+  var dg=$('#dgrid');if(dg)dg.classList.toggle('d-empty',!S.example&&!S.gastos.length&&!S.ingresos.length&&!S.gym.length&&!S.comida.length&&!S.cuerpo.length);
   renderHud();
   document.querySelectorAll('.tab').forEach(function(a){if(a.dataset.tab===ui.tab){a.setAttribute('aria-current','page');try{var nv=a.parentNode;if(nv.scrollWidth>nv.clientWidth)nv.scrollTo({left:a.offsetLeft-nv.clientWidth/2+a.offsetWidth/2,behavior:'auto'})}catch(e){}}else a.removeAttribute('aria-current')});
   $('#hdate').textContent=new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});var h2=$('#hdate2');if(h2)h2.textContent=$('#hdate').textContent;
