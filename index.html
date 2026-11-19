@@ -2842,8 +2842,8 @@ function licInit(){
   var f=el.querySelector('form'),inp=f.querySelector('input'),msg=f.querySelector('.lm');
   var hm=/[#&]k=([0-9A-Fa-f-]{16,19})/.exec(location.hash||'');
   if(hm){var kk=licNorm(hm[1]);try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
-    if(kk.length===16&&!licHas(st)){inp.value=kk.replace(/(.{4})(?=.)/g,'$1-');setTimeout(function(){var bt=f.querySelector('.lbtn');if(bt)try{bt.focus()}catch(e){}},120)}}
-  inp.addEventListener('input',function(){var v=licNorm(inp.value);inp.value=v.replace(/(.{4})(?=.)/g,'$1-');msg.textContent=''});
+    if(kk.length===16&&!licHas(st)){inp.value=kk.replace(/(.{4})(?=.)/g,'$1-');msg.style.color='var(--ink2)';msg.textContent='Tu clave ya está escrita. Solo pulsa «Activar».';setTimeout(function(){var bt=f.querySelector('.lbtn');if(bt)try{bt.focus()}catch(e){}},120)}}
+  inp.addEventListener('input',function(){var v=licNorm(inp.value);inp.value=v.replace(/(.{4})(?=.)/g,'$1-');msg.style.color='';msg.textContent=''});
   f.addEventListener('submit',function(e){e.preventDefault();
     var v=licNorm(inp.value),h=v.length===16?sha256hex(v).slice(0,16):'';
     if(licHas(h)){try{localStorage.setItem(LIC_K,h);localStorage.setItem('bitacora-venta-key',v)}catch(x){}
@@ -2851,7 +2851,7 @@ function licInit(){
       if(cb&&cb.checked&&!sbS&&SB.url&&vOk()){msg.style.color='var(--ink2)';msg.textContent='Buscando tus datos en la nube…';var done=0,go=function(){if(done)return;done=1;msg.textContent='';msg.style.color='';unlock()};setTimeout(go,9000);
         vKeys(v).then(function(o){sbStore({id:o.id,k:o.k,t:Date.now()});return sbStart()}).then(go,go)}
       else unlock()}
-    else msg.textContent=v.length<16?'La clave está incompleta (16 caracteres).':'Clave no válida. Revisa que la has copiado entera.'});
+    else{msg.style.color='';msg.textContent=v.length<16?'La clave está incompleta (16 caracteres).':'Clave no válida. Revisa que la has copiado entera.'}});
 }
 
 licInit();
