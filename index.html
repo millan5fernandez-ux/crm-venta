@@ -878,7 +878,6 @@ body.drawer-open #dayflow{display:none}
     </div>
     <div class="hero"><h1 class="big">DASH<span>BOARD</span></h1><div id="clock" aria-live="off"><div class="ckg" id="cgreet"></div><div class="ckt"><span id="chm"></span><small id="cs"></small></div><div class="ckd" id="cdate"></div></div></div>
     <p class="sub">Tu semana de un vistazo: gastos, gym, comida y días. Pulsa una tarjeta o una zona del escritorio para abrirla.</p>
-    <section class="dcard" id="dayflow" aria-label="Tu día"></section>
     <div id="kpis"></div>
     <section class="dcard" id="acct" aria-label="Cuenta y sincronización"></section>
     <div id="dgrid">
@@ -1003,7 +1002,7 @@ function vDec(t){
     var u=new Uint8Array(p),d=u.slice(1);return u[0]===1?vPipe(d,DecompressionStream):Promise.resolve(d)}).then(function(d){return JSON.parse(new TextDecoder().decode(d))});
 }
 var MODS=[['gastos','Gastos'],['gym','Gym'],['comida','Comida'],['cuerpo','Personal'],['metas','Calendario']];
-function dayOn(){return !(S.profile&&S.profile.dayflow===0)}
+function dayOn(){return false}
 function modOn(k){var m=S.profile&&S.profile.mods;return !m||m[k]!==0}
 function applyMods(){document.body.dataset.off=MODS.filter(function(m){return !modOn(m[0])}).map(function(m){return m[0]}).join(' ')}
 var TABS=['escritorio','resumen','gastos','gym','comida','cuerpo','metas','ajustes'];
@@ -1726,7 +1725,6 @@ VIEWS.ajustes=function(){
     fld('perfil','goalWeight','Peso objetivo (kg)','number',pf.goalWeight==null?'':pf.goalWeight,'min="20" max="400" step="any" inputmode="decimal"')+
     '<details class="full"'+(pf.aforoUrl?' open':'')+'><summary style="cursor:pointer;color:var(--ink2);font-size:13px">Opciones avanzadas</summary><div class="fg" style="margin-top:10px">'+fld('perfil','aforoUrl','Aforo en directo de tu gimnasio (enlace https, opcional)','url',pf.aforoUrl||'','maxlength="300" placeholder="https://…"','full')+'</div></details>'+
     '<div class="f full"><span>Módulos activos</span><div class="mods2">'+MODS.map(function(m){return '<label><input type="checkbox" name="mod_'+m[0]+'"'+(modOn(m[0])?' checked':'')+'> '+m[1]+'</label>'}).join('')+'</div></div>'+
-    '<div class="f full"><span>Escritorio</span><div class="mods2"><label><input type="checkbox" name="dayflow"'+(dayOn()?' checked':'')+'> <span>Mostrar «Tu día» (pasos del día y recorrido guiado)</span></label></div></div>'+
     '</div><div class="fa"><button class="btn primary" type="submit">Guardar perfil</button><button class="btn" type="button" data-act="introagain">Ver la guía otra vez</button></div></form>';
   var s=S.set;
   var metas='<form class="card" data-form="metas" autocomplete="off"><h3>Mis objetivos</h3><div class="fg">'+
@@ -1942,7 +1940,6 @@ function onbRender(){
   el.innerHTML='<form class="card" data-form="onb" autocomplete="off"><h2>Bienvenido a Zancal</h2><p style="margin:0 0 14px;color:var(--ink2)">Tus datos se guardan en este dispositivo. Elige qué quieres usar; podrás cambiarlo cuando quieras en Ajustes.</p><div class="fg">'+
     fld('onb','name','¿Cómo te llamas?','text','','maxlength="30" autocomplete="given-name"','full')+
     '<div class="f full"><span>¿Qué quieres controlar?</span><div class="mods">'+MODS.map(function(m){return '<label><input type="checkbox" name="mod_'+m[0]+'" checked> '+m[1]+'</label>'}).join('')+'</div></div>'+
-    '<div class="f full"><span>Escritorio</span><div class="mods"><label><input type="checkbox" name="dayflow" checked> <span>Mostrar «Tu día»: pasos del día y recorrido guiado</span></label></div></div>'+
     fld('onb','height','Altura (cm)','number','','min="100" max="250" step="any" inputmode="decimal" placeholder="opcional"')+
     fld('onb','goalWeight','Peso objetivo (kg)','number','','min="20" max="400" step="any" inputmode="decimal" placeholder="opcional"')+
     fld('onb','kcal','Calorías al día (objetivo)','number',S.set.kcal,'min="800" step="50" inputmode="numeric"')+
